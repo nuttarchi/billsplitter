@@ -1,373 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kamkuk billsplitter</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- html2canvas for JPG Download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  
-  <!-- Minimal Font (DM Sans) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  
-  <style>
-    body { font-family: 'DM Sans', sans-serif; }
-  </style>
-</head>
-<body class="bg-neutral-50 min-h-screen p-4 md:p-8 text-black selection:bg-yellow-300 relative overflow-x-hidden">
-  <div class="max-w-4xl mx-auto space-y-6">
-
-    <!-- Header -->
-    <header class="text-center pt-4 pb-2">
-      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-black mb-2">Kamkuk billsplitter</h1>
-      <p class="text-neutral-500 text-sm uppercase tracking-widest font-medium">Fair & easy bill splitting</p>
-    </header>
-
-    <!-- Add People -->
-    <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-200">
-      <h2 class="text-xl font-bold text-black mb-5 flex items-center gap-3">
-        <span class="w-3 h-3 rounded-full bg-yellow-400"></span> Add People
-      </h2>
-      <div class="flex gap-2">
-        <input type="text" id="personName" placeholder="Enter name..." class="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition">
-        <button onclick="addPerson()" class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold transition whitespace-nowrap">Add</button>
-      </div>
-      <div id="peopleList" class="flex flex-wrap gap-2 mt-5"></div>
-    </section>
-
-    <!-- Add Food Items -->
-    <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-200">
-      <h2 class="text-xl font-bold text-black mb-5 flex items-center gap-3">
-        <span class="w-3 h-3 rounded-full bg-red-600"></span> Add Food Items
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-        <input type="text" id="foodName" placeholder="Item name" class="bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition">
-        <input type="number" id="foodPrice" placeholder="Price" class="bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition">
-        <button onclick="addFoodItem()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition">Add Item</button>
-      </div>
-
-      <div class="mb-2 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
-        <label class="block text-sm font-bold text-black mb-3">Who shared this item?</label>
-        <div id="personCheckboxes" class="flex flex-wrap gap-3">
-          <span class="text-neutral-400 text-sm">Please add people first</span>
-        </div>
-      </div>
-
-      <!-- Food Table -->
-      <div class="overflow-x-auto mt-6">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b-2 border-black text-black text-sm uppercase tracking-wide">
-              <th class="py-3 px-2 font-bold">Item</th>
-              <th class="py-3 px-2 font-bold">Price</th>
-              <th class="py-3 px-2 font-bold">Shared By</th>
-              <th class="py-3 px-2 font-bold text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="foodTableBody" class="divide-y divide-neutral-200 text-neutral-800"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Additional Charges -->
-    <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-200">
-      <h2 class="text-xl font-bold text-black mb-5 flex items-center gap-3">
-        <span class="w-3 h-3 rounded-full bg-black"></span> Additional Charges
-      </h2>
-      
-      <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
-        <div class="space-y-4 flex-1">
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" id="enableServiceCharge" onchange="calculateTotal()" class="w-5 h-5 accent-red-600 cursor-pointer">
-            <span class="font-medium text-black group-hover:text-red-600 transition">Service Charge 10%</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" id="enableVat" onchange="calculateTotal()" class="w-5 h-5 accent-red-600 cursor-pointer">
-            <span class="font-medium text-black group-hover:text-red-600 transition">VAT 7%</span>
-          </label>
-        </div>
-
-        <div class="flex-1 w-full">
-          <label for="discount" class="block text-sm font-bold text-black mb-2">Discount Amount</label>
-          <div class="relative">
-            <input type="number" id="discount" value="0" min="0" oninput="calculateTotal()" class="w-full bg-neutral-50 border border-neutral-200 rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition" placeholder="0">
-            <span class="absolute right-4 top-3 text-neutral-400 font-bold">-</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Summary Section -->
-    <section class="bg-black text-white p-6 md:p-8 rounded-2xl shadow-xl relative overflow-hidden">
-      <div class="absolute top-0 right-0 w-48 h-48 bg-yellow-400 rounded-full blur-3xl opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
-      <div class="absolute bottom-0 left-0 w-48 h-48 bg-red-600 rounded-full blur-3xl opacity-20 -ml-10 -mb-10 pointer-events-none"></div>
-
-      <h2 class="text-2xl font-bold mb-6 relative z-10 text-yellow-400">Summary</h2>
-      
-      <div id="summaryList" class="space-y-4 mb-8 relative z-10">
-         <div class="text-neutral-500 text-sm">No data yet</div>
-      </div>
-
-      <div class="border-t border-neutral-800 pt-5 flex justify-between items-end relative z-10">
-        <span class="text-lg font-bold text-neutral-400 uppercase tracking-widest">Grand Total</span>
-        <span id="grandTotal" class="text-4xl md:text-5xl font-bold text-white">0.00</span>
-      </div>
-
-      <!-- Download JPG Button -->
-      <button id="downloadBtn" onclick="generateImage()" class="w-full mt-8 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-6 rounded-xl transition flex items-center justify-center gap-2 relative z-10 shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-        </svg>
-        Generate Bill (JPG)
-      </button>
-    </section>
-  </div>
-
-  <!-- Container สำหรับจับภาพการ์ดสรุป -->
-  <div id="receiptCard" class="absolute top-0 left-[-9999px] w-[400px] bg-black text-white p-6 font-sans space-y-5 rounded-3xl" style="background-color: #000000;">
-    <div class="text-center border-b border-neutral-800 pb-4">
-      <h1 class="text-2xl font-bold text-white tracking-tight">Kamkuk billsplitter</h1>
-      <p class="text-[10px] text-neutral-400 uppercase tracking-widest mt-1">Bill Summary Receipt</p>
-    </div>
-    
-    <!-- Items breakdown -->
-    <div>
-      <h3 class="text-[11px] font-bold text-yellow-400 uppercase tracking-wider mb-2">Order Details</h3>
-      <div id="receiptItems" class="space-y-2 text-xs text-neutral-300"></div>
-    </div>
-    
-    <!-- Charges & Discount -->
-    <div id="receiptCharges" class="border-t border-neutral-800 pt-2 text-[11px] text-neutral-400 space-y-1"></div>
-    
-    <!-- Individual Totals -->
-    <div class="border-t border-neutral-800 pt-3">
-      <h3 class="text-[11px] font-bold text-yellow-400 uppercase tracking-wider mb-2">Individual Payment</h3>
-      <div id="receiptSummaryList" class="space-y-2"></div>
-    </div>
-    
-    <!-- Grand Total -->
-    <div class="border-t-2 border-yellow-400 pt-3 flex justify-between items-end">
-      <span class="text-xs font-bold uppercase text-neutral-400 tracking-wider">Grand Total</span>
-      <span id="receiptGrandTotal" class="text-2xl font-bold text-white">0.00</span>
-    </div>
-
-    <div class="text-center text-[9px] text-neutral-500 pt-1">
-      Generated by Kamkuk billsplitter
-    </div>
-  </div>
-
-  <!-- iOS Image Modal (Popup) -->
-  <div id="imageModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4 backdrop-blur-sm">
-    <div class="w-full max-w-sm text-center mb-3">
-      <h3 class="text-lg font-bold text-yellow-400 mb-1">📸 Image Generated!</h3>
-      <p class="text-neutral-300 text-xs">Long press the image below<br>to "Save Image" or share it.</p>
-    </div>
-    <div class="relative w-full max-w-sm max-h-[65vh] overflow-y-auto rounded-2xl shadow-2xl bg-neutral-900 border border-neutral-800">
-      <img id="generatedImageResult" src="" class="w-full h-auto block rounded-2xl">
-    </div>
-    <button onclick="closeModal()" class="mt-5 bg-white text-black px-8 py-2.5 rounded-xl font-bold hover:bg-neutral-200 transition text-sm">
-      Close
-    </button>
-  </div>
-
-  <script>
-    let people = [];
-    let foodItems = [];
-
-    function addPerson() {
-      const input = document.getElementById('personName');
-      const name = input.value.trim();
-      if (name && !people.includes(name)) {
-        people.push(name);
-        input.value = '';
-        renderPeople();
-        renderCheckboxes();
-      }
-    }
-
-    function removePerson(index) {
-      const removedName = people[index];
-      people.splice(index, 1);
-      foodItems.forEach(item => { item.sharedBy = item.sharedBy.filter(name => name !== removedName); });
-      renderPeople();
-      renderCheckboxes();
-      renderFoodTable();
-      calculateTotal();
-    }
-
-    function renderPeople() {
-      const container = document.getElementById('peopleList');
-      container.innerHTML = people.map((p, i) => `
-        <span class="bg-black text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
-          ${p}
-          <button onclick="removePerson(${i})" class="text-neutral-400 hover:text-red-500 ml-1 text-lg leading-none">&times;</button>
-        </span>
-      `).join('');
-    }
-
-    function renderCheckboxes() {
-      const container = document.getElementById('personCheckboxes');
-      if (people.length === 0) {
-        container.innerHTML = '<span class="text-neutral-400 text-sm">Please add people first</span>';
-        return;
-      }
-      container.innerHTML = people.map((p, i) => `
-        <label class="inline-flex items-center gap-2 cursor-pointer bg-white border border-neutral-200 px-4 py-2 rounded-xl hover:border-black transition shadow-sm">
-          <input type="checkbox" value="${p}" class="food-share-checkbox w-4 h-4 accent-red-600">
-          <span class="font-bold text-black">${p}</span>
-        </label>
-      `).join('');
-    }
-
-    function addFoodItem() {
-      const nameInput = document.getElementById('foodName');
-      const priceInput = document.getElementById('foodPrice');
-      const name = nameInput.value.trim();
-      const price = parseFloat(priceInput.value);
-      const checkboxes = document.querySelectorAll('.food-share-checkbox:checked');
-      const sharedBy = Array.from(checkboxes).map(cb => cb.value);
-
-      if (!name || isNaN(price) || price <= 0) { alert('Please enter a valid item name and price.'); return; }
-      if (sharedBy.length === 0) { alert('Please select at least one person.'); return; }
-
-      foodItems.push({ name, price, sharedBy });
-      nameInput.value = ''; priceInput.value = '';
-      document.querySelectorAll('.food-share-checkbox').forEach(cb => cb.checked = false);
-      renderFoodTable(); calculateTotal();
-    }
-
-    function removeFoodItem(index) {
-      foodItems.splice(index, 1);
-      renderFoodTable(); calculateTotal();
-    }
-
-    function renderFoodTable() {
-      const tbody = document.getElementById('foodTableBody');
-      tbody.innerHTML = foodItems.map((item, i) => `
-        <tr class="hover:bg-neutral-50 transition border-b border-neutral-100 last:border-0">
-          <td class="py-4 px-2 font-bold text-black">${item.name}</td>
-          <td class="py-4 px-2 text-neutral-600 font-medium">${item.price.toFixed(2)}</td>
-          <td class="py-4 px-2 text-sm text-neutral-500">${item.sharedBy.join(', ')}</td>
-          <td class="py-4 px-2 text-right">
-            <button onclick="removeFoodItem(${i})" class="text-red-600 hover:text-red-800 text-xs font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Remove</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function calculateTotal() {
-      if (people.length === 0) {
-        document.getElementById('summaryList').innerHTML = '<div class="text-neutral-500 text-sm">No data yet</div>';
-        document.getElementById('grandTotal').innerText = '0.00';
-        return;
-      }
-      let rawTotals = {}; people.forEach(p => rawTotals[p] = 0);
-      let subtotal = 0;
-      foodItems.forEach(item => {
-        subtotal += item.price;
-        const sharePrice = item.price / item.sharedBy.length;
-        item.sharedBy.forEach(person => { if (rawTotals[person] !== undefined) rawTotals[person] += sharePrice; });
-      });
-
-      const discount = parseFloat(document.getElementById('discount').value) || 0;
-      const enableSC = document.getElementById('enableServiceCharge').checked;
-      const enableVat = document.getElementById('enableVat').checked;
-
-      let multiplier = 1;
-      if (subtotal > 0) {
-        let currentTotal = subtotal - discount;
-        if (enableSC) currentTotal *= 1.10;
-        if (enableVat) currentTotal *= 1.07;
-        multiplier = currentTotal / subtotal;
-      }
-
-      let grandTotal = 0;
-      const summaryContainer = document.getElementById('summaryList');
-      summaryContainer.innerHTML = '';
-      people.forEach(p => {
-        const finalAmount = Math.max(0, rawTotals[p] * multiplier);
-        grandTotal += finalAmount;
-        summaryContainer.innerHTML += `
-          <div class="flex justify-between items-center py-1">
-            <span class="font-medium text-lg text-neutral-200">${p}</span>
-            <span class="font-bold text-xl text-yellow-400">${finalAmount.toFixed(2)}</span>
-          </div>`;
-      });
-      document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
-    }
-
-    function updateReceiptCard() {
-      const receiptItems = document.getElementById('receiptItems');
-      if (foodItems.length === 0) {
-        receiptItems.innerHTML = '<div class="text-neutral-500">No items added</div>';
-      } else {
-        receiptItems.innerHTML = foodItems.map(item => `
-          <div class="flex justify-between items-start">
-            <div>
-              <div class="font-bold text-white">${item.name}</div>
-              <div class="text-[10px] text-neutral-400">Shared: ${item.sharedBy.join(', ')}</div>
-            </div>
-            <div class="font-bold text-white">${item.price.toFixed(2)}</div>
-          </div>`).join('');
-      }
-
-      const discount = parseFloat(document.getElementById('discount').value) || 0;
-      const enableSC = document.getElementById('enableServiceCharge').checked;
-      const enableVat = document.getElementById('enableVat').checked;
-      let chargesHtml = '';
-      if (enableSC) chargesHtml += '<div class="flex justify-between"><span>Service Charge</span><span>10%</span></div>';
-      if (enableVat) chargesHtml += '<div class="flex justify-between"><span>VAT</span><span>7%</span></div>';
-      if (discount > 0) chargesHtml += `<div class="flex justify-between text-red-400"><span>Discount</span><span>-${discount.toFixed(2)}</span></div>`;
-      document.getElementById('receiptCharges').innerHTML = chargesHtml;
-
-      document.getElementById('receiptSummaryList').innerHTML = document.getElementById('summaryList').innerHTML;
-      document.getElementById('receiptGrandTotal').innerText = document.getElementById('grandTotal').innerText;
-    }
-
-    function generateImage() {
-      if (foodItems.length === 0 || people.length === 0) {
-        alert('Please add people and food items before generating the bill.');
-        return;
-      }
-
-      const btn = document.getElementById('downloadBtn');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '⏳ Generating...';
-
-      updateReceiptCard();
-
-      const receiptElement = document.getElementById('receiptCard');
-
-      html2canvas(receiptElement, {
-        backgroundColor: '#000000',
-        scale: 2,
-        useCORS: true,
-        logging: false
-      }).then(canvas => {
-        btn.innerHTML = originalText;
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helpme Split</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f5f5f7; 
+            padding: 20px; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            color: #1d1d1f; 
+        }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 5px; 
+            font-size: 32px; 
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        p.subtitle { 
+            text-align: center; 
+            color: #86868b; 
+            font-size: 13px; 
+            letter-spacing: 1px; 
+            margin-bottom: 30px; 
+            font-weight: 600;
+        }
+        .card { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
+        }
+        h2 { 
+            font-size: 18px; 
+            margin-top: 0; 
+            margin-bottom: 20px;
+            display: flex; 
+            align-items: center; 
+        }
+        .dot { 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            margin-right: 12px; 
+        }
+        .dot.yellow { background-color: #ffcc00; }
+        .dot.red { background-color: #ff3b30; }
+        .dot.green { background-color: #34c759; }
         
-        document.getElementById('generatedImageResult').src = imgData;
-        const modal = document.getElementById('imageModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }).catch(err => {
-        btn.innerHTML = originalText;
-        alert('Failed to generate image. Please try again.');
-      });
-    }
+        input[type="text"], input[type="number"], input[type="file"] { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid #e5e5ea; 
+            border-radius: 12px; 
+            margin-bottom: 12px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            background-color: #fafafa;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007aff;
+            background-color: #fff;
+        }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            color: white; 
+            transition: opacity 0.2s;
+        }
+        button:active { opacity: 0.8; }
+        button.add-btn { 
+            background-color: #ffcc00; 
+            color: #1d1d1f; 
+            width: auto; 
+            padding: 14px 24px; 
+        }
+        button.red-btn { background-color: #ff3b30; }
+        button.calc-btn { background-color: #1d1d1f; margin-bottom: 40px; }
+        
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row input { flex: 1; margin-bottom: 0; }
+        
+        .checkbox-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 12px;
+            border: 1px solid #e5e5ea;
+        }
+        .checkbox-label { 
+            display: flex; 
+            align-items: center; 
+            background: white; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            border: 1px solid #e5e5ea;
+            transition: all 0.2s;
+        }
+        .checkbox-label:has(input:checked) {
+            background: #ffcc00;
+            border-color: #ffcc00;
+            font-weight: bold;
+        }
+        .checkbox-label input { margin-right: 8px; display: none; }
+        
+        #summary { margin-top: 20px; margin-bottom: 40px; }
+        .bill-result { 
+            background: white; 
+            padding: 30px 24px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        /* Receipt zig-zag effect */
+        .bill-result::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 0, transparent 10px, white 11px);
+        }
+        .bill-result h2 { justify-content: center; font-size: 24px; margin-bottom: 30px;}
+        
+        .person-total { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 15px; 
+            border-bottom: 1px dashed #e5e5ea; 
+            padding-bottom: 10px; 
+            font-size: 17px;
+        }
+        .grand-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: 800;
+            color: #ff3b30;
+            padding-top: 15px;
+            border-top: 2px solid #1d1d1f;
+        }
+        
+        .qr-preview { 
+            max-width: 150px; 
+            max-height: 150px; 
+            display: block; 
+            margin: 10px 0; 
+            border-radius: 12px; 
+            border: 1px solid #e5e5ea;
+        }
+        
+        .pay-here { 
+            text-align: center; 
+            margin-top: 30px; 
+            padding-top: 25px; 
+            border-top: 2px dashed #e5e5ea; 
+        }
+        .pay-here h3 { 
+            color: #34c759; 
+            margin-bottom: 20px; 
+            font-size: 20px;
+        }
+        .bank-details { 
+            text-align: left; 
+            background: #f5f5f7; 
+            padding: 20px; 
+            border-radius: 16px; 
+            display: inline-block; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
+        .bank-details p { 
+            margin: 8px 0; 
+            font-size: 15px; 
+            display: flex;
+            justify-content: space-between;
+        }
+        .bank-details p span { font-weight: bold; color: #1d1d1f; }
+        
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { 
+            padding: 12px 0; 
+            border-bottom: 1px solid #f0f0f0; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        li:last-child { border-bottom: none; }
+        .delete-btn { 
+            background: #f5f5f7; 
+            color: #ff3b30; 
+            padding: 8px 12px; 
+            border-radius: 8px;
+            width: auto; 
+            font-size: 13px; 
+        }
+        
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .btn-upload {
+            background-color: #f5f5f7;
+            color: #007aff;
+            border: 1px dashed #007aff;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Helpme Split</h1>
+    <p class="subtitle">💗 NO MORE TABLE MATH 💗</p>
 
-    function closeModal() {
-      const modal = document.getElementById('imageModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  </script>
+    <!-- People Section -->
+    <div class="card">
+        <h2><span class="dot yellow"></span> Add People</h2>
+        <div class="flex-row">
+            <input type="text" id="personName" placeholder="Enter name...">
+            <button class="add-btn" onclick="addPerson()">Add</button>
+        </div>
+        <ul id="peopleList" style="margin-top: 15px;"></ul>
+    </div>
+
+    <!-- Items Section -->
+    <div class="card">
+        <h2><span class="dot red"></span> Add Food Items</h2>
+        <input type="text" id="itemName" placeholder="Item name">
+        <input type="number" id="itemPrice" placeholder="Price (฿)">
+        <div style="margin: 20px 0 10px 0; font-weight: 600; font-size: 15px;">Who shared this item?</div>
+        <div id="sharedBy" class="checkbox-group">
+            <span style="color:#86868b; font-size:14px; font-style: italic;">Please add people first</span>
+        </div>
+        <button class="red-btn" onclick="addItem()">Add Item</button>
+        <ul id="itemList" style="margin-top: 15px;"></ul>
+    </div>
+
+    <!-- Payment Details Section -->
+    <div class="card">
+        <h2><span class="dot green"></span> Payment Info <span style="font-size: 12px; color: #86868b; margin-left: 8px; font-weight: normal;">(Optional)</span></h2>
+        
+        <div class="file-upload-wrapper">
+            <div class="btn-upload">📷 Upload QR Code (PromptPay)</div>
+            <input type="file" id="qrUpload" accept="image/*" onchange="previewQR(event)">
+        </div>
+        <img id="qrPreviewImage" class="qr-preview" style="display:none;">
+        
+        <div style="margin: 20px 0 10px 0; font-weight: 600; font-size: 15px;">Or Bank Details</div>
+        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank, SCB)">
+        <input type="text" id="accNumber" placeholder="Account Number">
+        <input type="text" id="accName" placeholder="Account Name">
+    </div>
+
+    <button class="calc-btn" onclick="generateBill()">Generate Bill</button>
+
+    <div id="summary"></div>
+
+    <script>
+        let people = [];
+        let items = [];
+        let qrDataUrl = '';
+
+        function addPerson() {
+            const nameInput = document.getElementById('personName');
+            const name = nameInput.value.trim();
+            if (name && !people.includes(name)) {
+                people.push(name);
+                nameInput.value = '';
+                updatePeopleList();
+                updateCheckboxGroup();
+            }
+        }
+
+        function removePerson(index) {
+            people.splice(index, 1);
+            updatePeopleList();
+            updateCheckboxGroup();
+        }
+
+        function updatePeopleList() {
+            const list = document.getElementById('peopleList');
+            list.innerHTML = '';
+            people.forEach((p, i) => {
+                list.innerHTML += `<li><span>${p}</span> <button class="delete-btn" onclick="removePerson(${i})">Remove</button></li>`;
+            });
+        }
+
+        function updateCheckboxGroup() {
+            const group = document.getElementById('sharedBy');
+            if (people.length === 0) {
+                group.innerHTML = '<span style="color:#86868b; font-size:14px; font-style: italic;">Please add people first</span>';
+                return;
+            }
+            group.innerHTML = '';
+            people.forEach(p => {
+                group.innerHTML += `<label class="checkbox-label"><input type="checkbox" value="${p}" class="person-cb"> ${p}</label>`;
+            });
+            
+            // Add event listeners to toggle visual state of custom checkboxes
+            document.querySelectorAll('.person-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if(this.checked) {
+                        this.parentElement.style.background = '#ffcc00';
+                        this.parentElement.style.borderColor = '#ffcc00';
+                        this.parentElement.style.fontWeight = 'bold';
+                    } else {
+                        this.parentElement.style.background = 'white';
+                        this.parentElement.style.borderColor = '#e5e5ea';
+                        this.parentElement.style.fontWeight = 'normal';
+                    }
+                });
+            });
+        }
+
+        function addItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const checkboxes = document.querySelectorAll('.person-cb:checked');
+            
+            if (!name || isNaN(price) || price <= 0) {
+                alert('Please enter a valid item name and price.');
+                return;
+            }
+            if (checkboxes.length === 0) {
+                alert('Please select at least one person who shared this item.');
+                return;
+            }
+
+            const sharedBy = Array.from(checkboxes).map(cb => cb.value);
+            items.push({ name, price, sharedBy });
+            
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+            
+            // Reset checkboxes visually and logically
+            document.querySelectorAll('.person-cb').forEach(cb => {
+                cb.checked = false;
+                cb.parentElement.style.background = 'white';
+                cb.parentElement.style.borderColor = '#e5e5ea';
+                cb.parentElement.style.fontWeight = 'normal';
+            });
+            
+            updateItemList();
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            updateItemList();
+        }
+
+        function updateItemList() {
+            const list = document.getElementById('itemList');
+            list.innerHTML = '';
+            items.forEach((item, i) => {
+                list.innerHTML += `<li>
+                    <div>
+                        <strong style="font-size: 16px;">${item.name}</strong> 
+                        <span style="color: #ff3b30; font-weight: 600; margin-left: 5px;">฿${item.price}</span> 
+                        <br><small style="color:#86868b; display:inline-block; margin-top:4px;">Shared by: ${item.sharedBy.join(', ')}</small>
+                    </div>
+                    <button class="delete-btn" onclick="removeItem(${i})">Remove</button>
+                </li>`;
+            });
+        }
+
+        function previewQR(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    qrDataUrl = e.target.result;
+                    const img = document.getElementById('qrPreviewImage');
+                    img.src = qrDataUrl;
+                    img.style.display = 'block';
+                    
+                    // Update button text
+                    document.querySelector('.btn-upload').textContent = '✅ QR Code Uploaded (Click to change)';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function generateBill() {
+            if (people.length === 0 || items.length === 0) {
+                alert('Please add people and items first.');
+                return;
+            }
+
+            let totals = {};
+            people.forEach(p => totals[p] = 0);
+
+            items.forEach(item => {
+                const splitAmount = item.price / item.sharedBy.length;
+                item.sharedBy.forEach(p => {
+                    if (totals[p] !== undefined) {
+                        totals[p] += splitAmount;
+                    }
+                });
+            });
+
+            let grandTotal = 0;
+            let html = '<div class="bill-result"><h2>🧾 Bill Summary</h2>';
+            
+            for (const person in totals) {
+                const amt = totals[person];
+                if (amt > 0) {
+                    html += `<div class="person-total"><span>${person}</span> <strong>฿${amt.toFixed(2)}</strong></div>`;
+                    grandTotal += amt;
+                }
+            }
+            
+            html += `<div class="grand-total"><span>Total</span> <span>฿${grandTotal.toFixed(2)}</span></div>`;
+
+            // Add Payment Section
+            const bankName = document.getElementById('bankName').value.trim();
+            const accNum = document.getElementById('accNumber').value.trim();
+            const accName = document.getElementById('accName').value.trim();
+
+            if (qrDataUrl || bankName || accNum || accName) {
+                html += `<div class="pay-here">
+                    <h3>☘️ Pay here ☘️</h3>`;
+                
+                if (qrDataUrl) {
+                    html += `<img src="${qrDataUrl}" alt="QR Code" style="max-width: 220px; width: 100%; border-radius: 16px; display: block; margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e5ea;">`;
+                }
+
+                if (bankName || accNum || accName) {
+                    html += `<div class="bank-details">`;
+                    if (bankName) html += `<p>Bank: <span>${bankName}</span></p>`;
+                    if (accNum) html += `<p>Account No: <span>${accNum}</span></p>`;
+                    if (accName) html += `<p>Name: <span>${accName}</span></p>`;
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            }
+
+            html += '</div>';
+            document.getElementById('summary').innerHTML = html;
+            
+            // Scroll to summary
+            setTimeout(() => {
+                document.getElementById('summary').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    </script>
 </body>
 </html>
