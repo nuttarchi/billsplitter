@@ -1,92 +1,123 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบหารค่าอาหาร</title>
+  <title>Kamkuk billsplitter</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Minimal Font (DM Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-8 font-sans">
+<body class="bg-neutral-50 min-h-screen p-4 md:p-8 text-black selection:bg-yellow-300">
   <div class="max-w-4xl mx-auto space-y-6">
-    
-    <header class="text-center">
-      <h1 class="text-3xl font-bold text-slate-800">ระบบหารค่าอาหาร</h1>
-      <p class="text-slate-500 mt-1">คำนวณแยกรายบุคคลแบบแฟร์ๆ</p>
+
+    <!-- Header -->
+    <header class="text-center pt-4 pb-2">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-black mb-2">Kamkuk billsplitter</h1>
+      <p class="text-neutral-500 text-sm uppercase tracking-widest font-medium">Fair & easy bill splitting</p>
     </header>
 
-    <!-- 1. จัดการรายชื่อ -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-      <h2 class="text-xl font-bold text-slate-700 mb-4">1. เพิ่มรายชื่อผู้ร่วมหาร</h2>
+    <!-- Add People -->
+    <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-200">
+      <h2 class="text-xl font-bold text-black mb-5 flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-yellow-400"></span> Add People
+      </h2>
       <div class="flex gap-2">
-        <input type="text" id="personName" placeholder="ระบุชื่อ..." class="flex-1 border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button onclick="addPerson()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">เพิ่มคน</button>
+        <input type="text" id="personName" placeholder="Enter name..." class="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition">
+        <button onclick="addPerson()" class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold transition whitespace-nowrap">Add</button>
       </div>
-      <div id="peopleList" class="flex flex-wrap gap-2 mt-4"></div>
+      <div id="peopleList" class="flex flex-wrap gap-2 mt-5"></div>
     </section>
 
-    <!-- 2. เพิ่มรายการอาหาร -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-      <h2 class="text-xl font-bold text-slate-700 mb-4">2. เพิ่มรายการอาหาร</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-        <input type="text" id="foodName" placeholder="ชื่อเมนู" class="border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <input type="number" id="foodPrice" placeholder="ราคา (บาท)" class="border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button onclick="addFoodItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition">บันทึกเมนู</button>
+    <!-- Add Food Items -->
+    <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-200">
+      <h2 class="text-xl font-bold text-black mb-5 flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-red-600"></span> Add Food Items
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+        <input type="text" id="foodName" placeholder="Item name" class="bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition">
+        <input type="number" id="foodPrice" placeholder="Price" class="bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition">
+        <button onclick="addFoodItem()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition">Add Item</button>
       </div>
 
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-slate-600 mb-2">เลือกว่าใครกินเมนูนี้บ้าง:</label>
-        <div id="personCheckboxes" class="flex flex-wrap gap-4 text-slate-700">
-          <span class="text-slate-400 text-sm">กรุณาเพิ่มรายชื่อก่อน</span>
+      <div class="mb-2 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
+        <label class="block text-sm font-bold text-black mb-3">Who shared this item?</label>
+        <div id="personCheckboxes" class="flex flex-wrap gap-3">
+          <span class="text-neutral-400 text-sm">Please add people first</span>
         </div>
       </div>
 
-      <!-- ตารางรายการอาหาร -->
+      <!-- Food Table -->
       <div class="overflow-x-auto mt-6">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="border-b border-slate-200 text-slate-500 text-sm">
-              <th class="py-2">เมนู</th>
-              <th class="py-2">ราคา</th>
-              <th class="py-2">คนร่วมหาร</th>
-              <th class="py-2 text-right">จัดการ</th>
+            <tr class="border-b-2 border-black text-black text-sm uppercase tracking-wide">
+              <th class="py-3 px-2 font-bold">Item</th>
+              <th class="py-3 px-2 font-bold">Price</th>
+              <th class="py-3 px-2 font-bold">Shared By</th>
+              <th class="py-3 px-2 font-bold text-right">Action</th>
             </tr>
           </thead>
-          <tbody id="foodTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          <tbody id="foodTableBody" class="divide-y divide-neutral-200 text-neutral-800"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- 3. ส่วนลด / Vat / Service Charge -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-      <h2 class="text-xl font-bold text-slate-700 mb-4">3. ค่าบริการเพิ่มเติม / ส่วนลด</h2>
+    <!-- Additional Charges -->
+    <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-200">
+      <h2 class="text-xl font-bold text-black mb-5 flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-black"></span> Additional Charges
+      </h2>
       
-      <div class="space-y-4">
-        <div class="flex items-center gap-2">
-          <input type="checkbox" id="enableServiceCharge" onchange="calculateTotal()" class="w-4 h-4 text-blue-600 rounded">
-          <label for="enableServiceCharge" class="text-slate-700 font-medium">Service Charge 10%</label>
+      <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+        <div class="space-y-4 flex-1">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" id="enableServiceCharge" onchange="calculateTotal()" class="w-5 h-5 accent-red-600 cursor-pointer">
+            <span class="font-medium text-black group-hover:text-red-600 transition">Service Charge 10%</span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" id="enableVat" onchange="calculateTotal()" class="w-5 h-5 accent-red-600 cursor-pointer">
+            <span class="font-medium text-black group-hover:text-red-600 transition">VAT 7%</span>
+          </label>
         </div>
 
-        <div class="flex items-center gap-2">
-          <input type="checkbox" id="enableVat" onchange="calculateTotal()" class="w-4 h-4 text-blue-600 rounded">
-          <label for="enableVat" class="text-slate-700 font-medium">VAT 7%</label>
-        </div>
-
-        <div class="pt-2">
-          <label for="discount" class="block text-sm font-medium text-slate-600 mb-1">ส่วนลดท้ายบิล (Optional - บาท)</label>
-          <input type="number" id="discount" value="0" min="0" oninput="calculateTotal()" class="w-full md:w-1/3 border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex-1 w-full">
+          <label for="discount" class="block text-sm font-bold text-black mb-2">Discount Amount</label>
+          <div class="relative">
+            <input type="number" id="discount" value="0" min="0" oninput="calculateTotal()" class="w-full bg-neutral-50 border border-neutral-200 rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition" placeholder="0">
+            <span class="absolute right-4 top-3 text-neutral-400 font-bold">-</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 4. สรุปผลการคำนวณ -->
-    <section class="bg-slate-800 text-white p-6 rounded-xl shadow-sm">
-      <h2 class="text-xl font-bold mb-4">4. สรุปยอดเงินที่ต้องจ่าย</h2>
-      
-      <div id="summaryList" class="space-y-2 divide-y divide-slate-700 mb-6"></div>
+    <!-- Summary -->
+    <section class="bg-black text-white p-6 md:p-8 rounded-2xl shadow-xl relative overflow-hidden">
+      <!-- Decor lights -->
+      <div class="absolute top-0 right-0 w-48 h-48 bg-yellow-400 rounded-full blur-3xl opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-red-600 rounded-full blur-3xl opacity-20 -ml-10 -mb-10 pointer-events-none"></div>
 
-      <div class="border-t border-slate-700 pt-4 flex justify-between items-center text-lg font-bold">
-        <span>ยอดรวมทั้งสิ้น:</span>
-        <span id="grandTotal" class="text-emerald-400 text-2xl">0.00 บาท</span>
+      <h2 class="text-2xl font-bold mb-6 relative z-10 text-yellow-400">Summary</h2>
+      
+      <div id="summaryList" class="space-y-4 mb-8 relative z-10">
+         <div class="text-neutral-500 text-sm">No data yet</div>
+      </div>
+
+      <div class="border-t border-neutral-800 pt-5 flex justify-between items-end relative z-10">
+        <span class="text-lg font-bold text-neutral-400 uppercase tracking-widest">Grand Total</span>
+        <span id="grandTotal" class="text-4xl md:text-5xl font-bold text-white">0.00</span>
       </div>
     </section>
 
@@ -111,7 +142,6 @@
       const removedName = people[index];
       people.splice(index, 1);
       
-      // ลบคนที่ถูกตัดออกออกจากรายการอาหารด้วย
       foodItems.forEach(item => {
         item.sharedBy = item.sharedBy.filter(name => name !== removedName);
       });
@@ -125,9 +155,9 @@
     function renderPeople() {
       const container = document.getElementById('peopleList');
       container.innerHTML = people.map((p, i) => `
-        <span class="bg-slate-200 text-slate-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+        <span class="bg-black text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
           ${p}
-          <button onclick="removePerson(${i})" class="text-slate-500 hover:text-red-500 font-bold">&times;</button>
+          <button onclick="removePerson(${i})" class="text-neutral-400 hover:text-red-500 ml-1 text-lg leading-none">&times;</button>
         </span>
       `).join('');
     }
@@ -135,13 +165,13 @@
     function renderCheckboxes() {
       const container = document.getElementById('personCheckboxes');
       if (people.length === 0) {
-        container.innerHTML = '<span class="text-slate-400 text-sm">กรุณาเพิ่มรายชื่อก่อน</span>';
+        container.innerHTML = '<span class="text-neutral-400 text-sm">Please add people first</span>';
         return;
       }
       container.innerHTML = people.map((p, i) => `
-        <label class="inline-flex items-center gap-1 cursor-pointer">
-          <input type="checkbox" value="${p}" class="food-share-checkbox w-4 h-4 text-blue-600 rounded">
-          <span>${p}</span>
+        <label class="inline-flex items-center gap-2 cursor-pointer bg-white border border-neutral-200 px-4 py-2 rounded-xl hover:border-black transition shadow-sm">
+          <input type="checkbox" value="${p}" class="food-share-checkbox w-4 h-4 accent-red-600">
+          <span class="font-bold text-black">${p}</span>
         </label>
       `).join('');
     }
@@ -156,17 +186,16 @@
       const sharedBy = Array.from(checkboxes).map(cb => cb.value);
 
       if (!name || isNaN(price) || price <= 0) {
-        alert('กรุณากรอกชื่อเมนูและราคาให้ถูกต้อง');
+        alert('Please enter a valid item name and price.');
         return;
       }
       if (sharedBy.length === 0) {
-        alert('กรุณาเลือกอย่างน้อย 1 คนเพื่อร่วมหาร');
+        alert('Please select at least one person.');
         return;
       }
 
       foodItems.push({ name, price, sharedBy });
       
-      // ล้างค่าฟอร์ม
       nameInput.value = '';
       priceInput.value = '';
       document.querySelectorAll('.food-share-checkbox').forEach(cb => cb.checked = false);
@@ -184,12 +213,12 @@
     function renderFoodTable() {
       const tbody = document.getElementById('foodTableBody');
       tbody.innerHTML = foodItems.map((item, i) => `
-        <tr>
-          <td class="py-2 font-medium">${item.name}</td>
-          <td class="py-2">${item.price.toFixed(2)}</td>
-          <td class="py-2 text-sm text-slate-500">${item.sharedBy.join(', ')}</td>
-          <td class="py-2 text-right">
-            <button onclick="removeFoodItem(${i})" class="text-red-500 hover:text-red-700 text-sm">ลบ</button>
+        <tr class="hover:bg-neutral-50 transition border-b border-neutral-100 last:border-0">
+          <td class="py-4 px-2 font-bold text-black">${item.name}</td>
+          <td class="py-4 px-2 text-neutral-600 font-medium">${item.price.toFixed(2)}</td>
+          <td class="py-4 px-2 text-sm text-neutral-500">${item.sharedBy.join(', ')}</td>
+          <td class="py-4 px-2 text-right">
+            <button onclick="removeFoodItem(${i})" class="text-red-600 hover:text-red-800 text-xs font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Remove</button>
           </td>
         </tr>
       `).join('');
@@ -197,12 +226,11 @@
 
     function calculateTotal() {
       if (people.length === 0) {
-        document.getElementById('summaryList').innerHTML = '<div class="text-slate-400">ยังไม่มีข้อมูล</div>';
-        document.getElementById('grandTotal').innerText = '0.00 บาท';
+        document.getElementById('summaryList').innerHTML = '<div class="text-neutral-500 text-sm">No data yet</div>';
+        document.getElementById('grandTotal').innerText = '0.00';
         return;
       }
 
-      // 1. คำนวณยอดดิบของแต่ละคน
       let rawTotals = {};
       people.forEach(p => rawTotals[p] = 0);
 
@@ -217,21 +245,18 @@
         });
       });
 
-      // 2. คำนวณส่วนลด, Service Charge และ VAT
       const discount = parseFloat(document.getElementById('discount').value) || 0;
       const enableSC = document.getElementById('enableServiceCharge').checked;
       const enableVat = document.getElementById('enableVat').checked;
 
-      // ตัวคูณสำหรับการกระจายค่าใช้จ่ายเสริมตามสัดส่วนที่กินจริง
       let multiplier = 1;
       if (subtotal > 0) {
         let currentTotal = subtotal - discount;
-        if (enableSC) currentTotal *= 1.10; // + Service Charge 10%
-        if (enableVat) currentTotal *= 1.07; // + VAT 7%
+        if (enableSC) currentTotal *= 1.10;
+        if (enableVat) currentTotal *= 1.07;
         multiplier = currentTotal / subtotal;
       }
 
-      // 3. คำนวณยอดสุทธิของแต่ละคน
       let grandTotal = 0;
       const summaryContainer = document.getElementById('summaryList');
       summaryContainer.innerHTML = '';
@@ -241,14 +266,14 @@
         grandTotal += finalAmount;
 
         summaryContainer.innerHTML += `
-          <div class="flex justify-between py-2 text-sm md:text-base">
-            <span>${p}</span>
-            <span class="font-mono font-bold text-emerald-400">${finalAmount.toFixed(2)} บาท</span>
+          <div class="flex justify-between items-center py-1">
+            <span class="font-medium text-lg text-neutral-200">${p}</span>
+            <span class="font-bold text-xl text-yellow-400">${finalAmount.toFixed(2)}</span>
           </div>
         `;
       });
 
-      document.getElementById('grandTotal').innerText = `${grandTotal.toFixed(2)} บาท`;
+      document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
     }
   </script>
 </body>
