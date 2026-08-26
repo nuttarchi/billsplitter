@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helpme Split</title>
-    <!-- Library สำหรับโหลดบิลเป็นรูปภาพ JPG -->
+    <!-- html2canvas สำหรับจับภาพ Popup บิลเป็นไฟล์รูป JPG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { 
@@ -78,26 +78,13 @@
             transition: opacity 0.2s;
         }
         button:active { opacity: 0.8; }
-        button.add-btn { 
-            background-color: #ffcc00; 
-            color: #1d1d1f; 
-            width: auto; 
-            padding: 14px 24px; 
-        }
+        button.add-btn { background-color: #ffcc00; color: #1d1d1f; width: auto; padding: 14px 24px; }
         button.red-btn { background-color: #ff3b30; color: white; }
-        button.download-btn { 
-            background-color: #ffcc00; 
-            color: #1d1d1f; 
-            margin-top: 20px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
+        button.generate-btn { background-color: #ffcc00; color: #1d1d1f; font-size: 18px; margin-top: 15px; }
+
         .flex-row { display: flex; gap: 10px; }
         .flex-row input { flex: 1; margin-bottom: 0; }
-        
+
         .checkbox-group { 
             display: flex; 
             flex-wrap: wrap; 
@@ -119,7 +106,7 @@
             border: 1px solid #e5e5ea;
         }
         .checkbox-label input { display: none; }
-        
+
         /* Item Table Styles */
         .table-header {
             display: flex;
@@ -145,16 +132,8 @@
         .col-shared { flex: 2; color: #86868b; font-size: 12px; text-align: center; padding: 0 5px; }
         .col-action { flex: 1; text-align: right; }
 
-        .delete-btn { 
-            background: none; 
-            color: #ff3b30; 
-            padding: 0; 
-            width: auto; 
-            font-size: 13px; 
-            font-weight: 600;
-        }
+        .delete-btn { background: none; color: #ff3b30; padding: 0; width: auto; font-size: 13px; font-weight: 600; }
 
-        /* Checkbox list style */
         .charge-option {
             display: flex;
             align-items: center;
@@ -164,74 +143,7 @@
             font-weight: 500;
             cursor: pointer;
         }
-        .charge-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #1d1d1f;
-        }
-
-        /* Summary Dark Card */
-        .summary-card {
-            background: linear-gradient(180deg, #1a1a1a 0%, #000000 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 30px;
-        }
-        .summary-card h2 {
-            color: #ffcc00;
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 16px;
-            color: #e5e5ea;
-        }
-        .grand-total-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #333;
-        }
-        .grand-total-label {
-            font-size: 14px;
-            letter-spacing: 1px;
-            color: #86868b;
-            font-weight: 700;
-        }
-        .grand-total-val {
-            font-size: 32px;
-            font-weight: 800;
-            color: white;
-        }
-
-        /* Pay Here Section inside Summary */
-        .pay-here-box {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px dashed #444;
-            text-align: center;
-        }
-        .pay-here-box h3 {
-            color: #34c759;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        .bank-info {
-            background: #222;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: left;
-            font-size: 14px;
-            color: #ccc;
-        }
-        .bank-info p { margin: 5px 0; display: flex; justify-content: space-between; }
-        .bank-info span { color: white; font-weight: bold; }
+        .charge-option input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1d1d1f; }
 
         .btn-upload {
             background-color: #fafafa;
@@ -246,9 +158,158 @@
             font-size: 14px;
         }
         .file-upload-wrapper { position: relative; overflow: hidden; }
-        .file-upload-wrapper input[type=file] {
-            position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%;
+        .file-upload-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
+
+        /* Main Page Live Summary Dark Card */
+        .summary-card {
+            background: #111111;
+            color: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 30px;
         }
+        .summary-card h2 { color: #ffcc00; font-size: 22px; margin-bottom: 15px; }
+        .grand-total-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        .grand-total-label { font-size: 14px; letter-spacing: 1px; color: #86868b; font-weight: 700; }
+        .grand-total-val { font-size: 32px; font-weight: 800; color: white; }
+
+        /* MODAL POPUP STYLING (ตรงตามรูปที่แนบมา) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        .modal-content {
+            width: 100%;
+            max-width: 380px;
+            margin: auto;
+        }
+        .receipt-card {
+            background-color: #000000;
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 30px 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .receipt-header-title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        .receipt-header-sub {
+            text-align: center;
+            font-size: 12px;
+            color: #86868b;
+            letter-spacing: 1.5px;
+            margin-top: 4px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .receipt-divider { border-top: 1px solid #222222; margin: 15px 0; }
+        .receipt-divider-gold { border-top: 2px solid #ffcc00; margin: 20px 0; }
+
+        .receipt-section-title {
+            color: #ffcc00;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .receipt-item-row {
+            margin-bottom: 12px;
+        }
+        .receipt-item-main {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .receipt-item-sub {
+            font-size: 12px;
+            color: #86868b;
+            margin-top: 2px;
+        }
+        .receipt-charge-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #cccccc;
+            margin-bottom: 8px;
+        }
+        .receipt-person-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .receipt-person-amount {
+            color: #ffcc00;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .receipt-grand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .receipt-grand-label { font-size: 14px; font-weight: 700; color: #86868b; letter-spacing: 1px; }
+        .receipt-grand-val { font-size: 28px; font-weight: 800; color: #ffffff; }
+
+        /* Pay Here Section inside Popup */
+        .pay-here-container {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed #333333;
+            text-align: center;
+        }
+        .pay-here-title { color: #34c759; font-size: 16px; font-weight: 700; margin-bottom: 15px; }
+        .pay-here-qr { max-width: 180px; width: 100%; border-radius: 12px; display: block; margin: 0 auto 15px auto; }
+        .pay-here-bank {
+            background: #111111;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 13px;
+            color: #aaaaaa;
+            border: 1px solid #222222;
+        }
+        .pay-here-bank p { margin: 4px 0; display: flex; justify-content: space-between; }
+        .pay-here-bank span { color: #ffffff; font-weight: bold; }
+
+        .receipt-footer-text {
+            text-align: center;
+            font-size: 11px;
+            color: #555555;
+            margin-top: 25px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-download-jpg { background: #ffcc00; color: #1d1d1f; font-weight: 700; }
+        .btn-close-modal { background: #333333; color: white; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -278,7 +339,6 @@
         </div>
         <button class="red-btn" onclick="addItem()">Add Item</button>
 
-        <!-- Item Table -->
         <div class="table-header">
             <span class="col-item">ITEM</span>
             <span class="col-price">PRICE</span>
@@ -291,18 +351,15 @@
     <!-- 3. Additional Charges -->
     <div class="card">
         <h2><span class="dot black"></span> Additional Charges</h2>
-        
         <label class="charge-option">
-            <input type="checkbox" id="scCheckbox" onchange="calculate()"> Service Charge 10%
+            <input type="checkbox" id="scCheckbox" onchange="updateLiveTotal()"> Service Charge 10%
         </label>
-        
         <label class="charge-option">
-            <input type="checkbox" id="vatCheckbox" onchange="calculate()"> VAT 7%
+            <input type="checkbox" id="vatCheckbox" onchange="updateLiveTotal()"> VAT 7%
         </label>
-
         <div style="margin-top: 15px;">
             <label style="font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px;">Discount Amount</label>
-            <input type="number" id="discountInput" value="0" oninput="calculate()">
+            <input type="number" id="discountInput" value="0" oninput="updateLiveTotal()">
         </div>
     </div>
 
@@ -316,32 +373,71 @@
         </div>
         <img id="qrPreviewImage" style="max-width: 120px; display:none; margin: 10px auto; border-radius: 8px;">
 
-        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank)" oninput="calculate()">
-        <input type="text" id="accNumber" placeholder="Account Number" oninput="calculate()">
-        <input type="text" id="accName" placeholder="Account Name" oninput="calculate()">
+        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank)">
+        <input type="text" id="accNumber" placeholder="Account Number">
+        <input type="text" id="accName" placeholder="Account Name">
     </div>
 
-    <!-- 5. Summary Dark Card -->
-    <div class="summary-card" id="billSummaryCard">
+    <!-- 5. Summary Card -->
+    <div class="summary-card">
         <h2>Summary</h2>
-        <div id="summaryContent" style="color: #86868b; font-size: 14px;">No data yet</div>
-
         <div class="grand-total-box">
             <span class="grand-total-label">GRAND TOTAL</span>
-            <span class="grand-total-val" id="grandTotalVal">0.00</span>
+            <span class="grand-total-val" id="liveGrandTotal">0.00</span>
         </div>
-
-        <!-- Pay Here Area -->
-        <div id="payHereArea" style="display: none;" class="pay-here-box">
-            <h3>☘️ Pay here ☘️</h3>
-            <img id="summaryQrImg" style="max-width: 180px; width:100%; border-radius: 12px; display: none; margin: 0 auto 15px auto;">
-            <div id="summaryBankInfo" class="bank-info" style="display: none;"></div>
-        </div>
+        <button class="generate-btn" onclick="generateBillModal()">📥 Generate Bill (JPG)</button>
     </div>
 
-    <button class="download-btn" onclick="downloadBillImage()">
-        📥 Generate Bill (JPG)
-    </button>
+    <!-- MODAL POPUP FOR RECEIPT -->
+    <div id="receiptModal" class="modal-overlay">
+        <div class="modal-content">
+            
+            <!-- Receipt Card To Capture -->
+            <div id="receiptCaptureCard" class="receipt-card">
+                <h1 class="receipt-header-title">Helpme Split</h1>
+                <p class="receipt-header-sub">BILL SUMMARY RECEIPT</p>
+
+                <div class="receipt-divider"></div>
+
+                <!-- ORDER DETAILS -->
+                <div class="receipt-section-title">ORDER DETAILS</div>
+                <div id="modalOrderDetails"></div>
+
+                <!-- CHARGES DETAILS -->
+                <div id="modalChargesDetails"></div>
+
+                <div class="receipt-divider"></div>
+
+                <!-- INDIVIDUAL PAYMENT -->
+                <div class="receipt-section-title">INDIVIDUAL PAYMENT</div>
+                <div id="modalIndividualPayment"></div>
+
+                <div class="receipt-divider-gold"></div>
+
+                <!-- GRAND TOTAL -->
+                <div class="receipt-grand-row">
+                    <span class="receipt-grand-label">GRAND TOTAL</span>
+                    <span class="receipt-grand-val" id="modalGrandTotalVal">0.00</span>
+                </div>
+
+                <!-- PAY HERE SECTION -->
+                <div id="modalPayHereContainer" class="pay-here-container" style="display: none;">
+                    <div class="pay-here-title">☘️ Pay here ☘️</div>
+                    <img id="modalQrImage" class="pay-here-qr" style="display: none;">
+                    <div id="modalBankInfo" class="pay-here-bank" style="display: none;"></div>
+                </div>
+
+                <div class="receipt-footer-text">Generated by Helpme Split</div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="modal-buttons">
+                <button class="btn-download-jpg" onclick="downloadReceiptJPG()">Save Image (JPG)</button>
+                <button class="btn-close-modal" onclick="closeModal()">Close</button>
+            </div>
+
+        </div>
+    </div>
 
     <script>
         let people = [];
@@ -356,7 +452,7 @@
                 input.value = '';
                 renderPeople();
                 renderCheckboxes();
-                calculate();
+                updateLiveTotal();
             }
         }
 
@@ -364,7 +460,7 @@
             people.splice(index, 1);
             renderPeople();
             renderCheckboxes();
-            calculate();
+            updateLiveTotal();
         }
 
         function renderPeople() {
@@ -418,13 +514,13 @@
             });
 
             renderItems();
-            calculate();
+            updateLiveTotal();
         }
 
         function removeItem(index) {
             items.splice(index, 1);
             renderItems();
-            calculate();
+            updateLiveTotal();
         }
 
         function renderItems() {
@@ -433,7 +529,7 @@
             items.forEach((item, i) => {
                 list.innerHTML += `<div class="table-row">
                     <span class="col-item">${item.name}</span>
-                    <span class="col-price">฿${item.price}</span>
+                    <span class="col-price">฿${item.price.toFixed(2)}</span>
                     <span class="col-shared">${item.sharedBy.join(', ')}</span>
                     <span class="col-action"><button class="delete-btn" onclick="removeItem(${i})">Remove</button></span>
                 </div>`;
@@ -447,76 +543,108 @@
                 reader.onload = function(e) {
                     qrDataUrl = e.target.result;
                     document.getElementById('uploadLabel').textContent = '✅ QR Code Uploaded';
-                    calculate();
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        function calculate() {
-            if (items.length === 0 || people.length === 0) {
-                document.getElementById('summaryContent').innerHTML = 'No data yet';
-                document.getElementById('grandTotalVal').textContent = '0.00';
-                document.getElementById('payHereArea').style.display = 'none';
+        function updateLiveTotal() {
+            if (items.length === 0) {
+                document.getElementById('liveGrandTotal').textContent = '0.00';
                 return;
             }
 
+            let subtotal = items.reduce((sum, item) => sum + item.price, 0);
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            let total = Math.max(0, subtotal - discount);
+
+            if (document.getElementById('scCheckbox').checked) total += total * 0.10;
+            if (document.getElementById('vatCheckbox').checked) total += total * 0.07;
+
+            document.getElementById('liveGrandTotal').textContent = total.toFixed(2);
+        }
+
+        function generateBillModal() {
+            if (people.length === 0 || items.length === 0) {
+                alert('Please add people and items first.');
+                return;
+            }
+
+            // 1. Render Order Details
+            let orderHtml = '';
             let subtotal = 0;
-            let personSubtotals = {};
-            people.forEach(p => personSubtotals[p] = 0);
+            let personTotals = {};
+            people.forEach(p => personTotals[p] = 0);
 
             items.forEach(item => {
                 subtotal += item.price;
-                const splitPrice = item.price / item.sharedBy.length;
+                orderHtml += `<div class="receipt-item-row">
+                    <div class="receipt-item-main">
+                        <span>${item.name}</span>
+                        <span>${item.price.toFixed(2)}</span>
+                    </div>
+                    <div class="receipt-item-sub">Shared: ${item.sharedBy.join(', ')}</div>
+                </div>`;
+
+                const splitAmount = item.price / item.sharedBy.length;
                 item.sharedBy.forEach(p => {
-                    if (personSubtotals[p] !== undefined) {
-                        personSubtotals[p] += splitPrice;
-                    }
+                    if (personTotals[p] !== undefined) personTotals[p] += splitAmount;
                 });
             });
+            document.getElementById('modalOrderDetails').innerHTML = orderHtml;
 
+            // 2. Render Charges Details
+            let chargesHtml = '';
             const discount = parseFloat(document.getElementById('discountInput').value) || 0;
             let currentTotal = Math.max(0, subtotal - discount);
 
-            const hasSC = document.getElementById('scCheckbox').checked;
-            const scAmount = hasSC ? currentTotal * 0.10 : 0;
-            currentTotal += scAmount;
+            if (discount > 0) {
+                chargesHtml += `<div class="receipt-charge-row"><span>Discount</span><span>-${discount.toFixed(2)}</span></div>`;
+            }
+            if (document.getElementById('scCheckbox').checked) {
+                const sc = currentTotal * 0.10;
+                chargesHtml += `<div class="receipt-charge-row"><span>Service Charge</span><span>10%</span></div>`;
+                currentTotal += sc;
+            }
+            if (document.getElementById('vatCheckbox').checked) {
+                const vat = currentTotal * 0.07;
+                chargesHtml += `<div class="receipt-charge-row"><span>VAT</span><span>7%</span></div>`;
+                currentTotal += vat;
+            }
+            document.getElementById('modalChargesDetails').innerHTML = chargesHtml;
 
-            const hasVAT = document.getElementById('vatCheckbox').checked;
-            const vatAmount = hasVAT ? currentTotal * 0.07 : 0;
-            const grandTotal = currentTotal + vatAmount;
-
-            // Ratio for additional charges
-            const multiplier = subtotal > 0 ? (grandTotal / subtotal) : 0;
-
-            let html = '';
+            // 3. Render Individual Payment
+            const multiplier = subtotal > 0 ? (currentTotal / subtotal) : 0;
+            let individualHtml = '';
             people.forEach(p => {
-                const finalPersonTotal = personSubtotals[p] * multiplier;
-                if (finalPersonTotal > 0) {
-                    html += `<div class="summary-item"><span>${p}</span> <strong>฿${finalPersonTotal.toFixed(2)}</strong></div>`;
+                const finalAmt = personTotals[p] * multiplier;
+                if (finalAmt > 0) {
+                    individualHtml += `<div class="receipt-person-row">
+                        <span>${p}</span>
+                        <span class="receipt-person-amount">${finalAmt.toFixed(2)}</span>
+                    </div>`;
                 }
             });
+            document.getElementById('modalIndividualPayment').innerHTML = individualHtml;
+            document.getElementById('modalGrandTotalVal').textContent = currentTotal.toFixed(2);
 
-            document.getElementById('summaryContent').innerHTML = html;
-            document.getElementById('grandTotalVal').textContent = grandTotal.toFixed(2);
-
-            // Payment Details Render
+            // 4. Render Pay Here Section inside Modal Popup
             const bank = document.getElementById('bankName').value.trim();
             const accNum = document.getElementById('accNumber').value.trim();
             const accName = document.getElementById('accName').value.trim();
 
-            const payHereArea = document.getElementById('payHereArea');
-            const summaryQrImg = document.getElementById('summaryQrImg');
-            const summaryBankInfo = document.getElementById('summaryBankInfo');
+            const payHereContainer = document.getElementById('modalPayHereContainer');
+            const qrImg = document.getElementById('modalQrImage');
+            const bankInfo = document.getElementById('modalBankInfo');
 
             if (qrDataUrl || bank || accNum || accName) {
-                payHereArea.style.display = 'block';
+                payHereContainer.style.display = 'block';
 
                 if (qrDataUrl) {
-                    summaryQrImg.src = qrDataUrl;
-                    summaryQrImg.style.display = 'block';
+                    qrImg.src = qrDataUrl;
+                    qrImg.style.display = 'block';
                 } else {
-                    summaryQrImg.style.display = 'none';
+                    qrImg.style.display = 'none';
                 }
 
                 if (bank || accNum || accName) {
@@ -524,22 +652,29 @@
                     if (bank) bankHtml += `<p>Bank: <span>${bank}</span></p>`;
                     if (accNum) bankHtml += `<p>Account No: <span>${accNum}</span></p>`;
                     if (accName) bankHtml += `<p>Name: <span>${accName}</span></p>`;
-                    summaryBankInfo.innerHTML = bankHtml;
-                    summaryBankInfo.style.display = 'block';
+                    bankInfo.innerHTML = bankHtml;
+                    bankInfo.style.display = 'block';
                 } else {
-                    summaryBankInfo.style.display = 'none';
+                    bankInfo.style.display = 'none';
                 }
             } else {
-                payHereArea.style.display = 'none';
+                payHereContainer.style.display = 'none';
             }
+
+            // Open Modal
+            document.getElementById('receiptModal').style.display = 'flex';
         }
 
-        function downloadBillImage() {
-            const summaryCard = document.getElementById('billSummaryCard');
-            html2canvas(summaryCard, { backgroundColor: null }).then(canvas => {
+        function closeModal() {
+            document.getElementById('receiptModal').style.display = 'none';
+        }
+
+        function downloadReceiptJPG() {
+            const card = document.getElementById('receiptCaptureCard');
+            html2canvas(card, { backgroundColor: '#000000', scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'Helpme-Split-Bill.jpg';
-                link.href = canvas.toDataURL('image/jpeg');
+                link.download = 'Helpme-Split-Receipt.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
                 link.click();
             });
         }
