@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helpme Split</title>
-
-    <!-- ใส่ลิงก์ URL รูปภาพของคุณตรงนี้ -->
-    <link rel="apple-touch-icon" href="IMG_0884.jpeg">
-<link rel="icon" type="image/png" href="IMG_0884.jpeg">
-
     
+    <!-- App Icon & Favicon -->
+    <link rel="apple-touch-icon" href="IMG_0884.jpeg">
+    <link rel="icon" type="image/jpeg" href="IMG_0884.jpeg">
+
     <!-- Library สำหรับแปลง HTML เป็นไฟล์รูปภาพ JPG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -86,7 +85,7 @@
         button:active { opacity: 0.8; }
         button.add-btn { background-color: #ffcc00; color: #1d1d1f; width: auto; padding: 14px 24px; }
         button.red-btn { background-color: #ff3b30; color: white; }
-        button.generate-btn { background-color: #ffcc00; color: #1d1d1f; font-size: 18px; margin-top: 15px; }
+        button.generate-btn { background-color: #ffcc00; color: #1d1d1f; font-size: 18px; margin-top: 20px; }
 
         .flex-row { display: flex; gap: 10px; }
         .flex-row input { flex: 1; margin-bottom: 0; }
@@ -175,6 +174,21 @@
             margin-bottom: 30px;
         }
         .summary-card h2 { color: #ffcc00; font-size: 22px; margin-bottom: 15px; }
+        
+        .realtime-person-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .realtime-person-val {
+            color: #ffcc00;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
         .grand-total-box {
             display: flex;
             justify-content: space-between;
@@ -205,7 +219,6 @@
             margin: auto;
             text-align: center;
         }
-        /* รูปภาพบิล JPG ที่ Generate ออกมา */
         #generatedBillImg {
             width: 100%;
             border-radius: 16px;
@@ -225,7 +238,7 @@
         .btn-download-jpg { background: #ffcc00; color: #1d1d1f; font-weight: 700; }
         .btn-close-modal { background: #333333; color: white; font-weight: 600; }
 
-        /* HIDDEN RECEIPT CANVAS (สำหรับเรนเดอร์เป็นภาพซ่อนไว้หลังบ้าน) */
+        /* HIDDEN RECEIPT CANVAS */
         #hiddenReceiptContainer {
             position: absolute;
             left: -9999px;
@@ -241,34 +254,11 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             box-sizing: border-box;
         }
-        .receipt-header-title {
-            text-align: center;
-            font-size: 26px;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-        .receipt-header-sub {
-            text-align: center;
-            font-size: 12px;
-            color: #86868b;
-            letter-spacing: 1.5px;
-            margin-top: 4px;
-            margin-bottom: 20px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        .receipt-header-title { text-align: center; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+        .receipt-header-sub { text-align: center; font-size: 12px; color: #86868b; letter-spacing: 1.5px; margin-top: 4px; margin-bottom: 20px; font-weight: 600; text-transform: uppercase; }
         .receipt-divider { border-top: 1px solid #222222; margin: 15px 0; }
         .receipt-divider-gold { border-top: 2px solid #ffcc00; margin: 20px 0; }
-
-        .receipt-section-title {
-            color: #ffcc00;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
+        .receipt-section-title { color: #ffcc00; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
         .receipt-item-row { margin-bottom: 12px; }
         .receipt-item-main { display: flex; justify-content: space-between; font-weight: 700; font-size: 16px; }
         .receipt-item-sub { font-size: 12px; color: #86868b; margin-top: 2px; }
@@ -279,23 +269,10 @@
         .receipt-grand-label { font-size: 14px; font-weight: 700; color: #86868b; letter-spacing: 1px; }
         .receipt-grand-val { font-size: 28px; font-weight: 800; color: #ffffff; }
 
-        .pay-here-container {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px dashed #333333;
-            text-align: center;
-        }
+        .pay-here-container { margin-top: 25px; padding-top: 20px; border-top: 1px dashed #333333; text-align: center; }
         .pay-here-title { color: #34c759; font-size: 16px; font-weight: 700; margin-bottom: 15px; }
         .pay-here-qr { max-width: 180px; width: 100%; border-radius: 12px; display: block; margin: 0 auto 15px auto; }
-        .pay-here-bank {
-            background: #111111;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: left;
-            font-size: 13px;
-            color: #aaaaaa;
-            border: 1px solid #222222;
-        }
+        .pay-here-bank { background: #111111; padding: 15px; border-radius: 12px; text-align: left; font-size: 13px; color: #aaaaaa; border: 1px solid #222222; }
         .pay-here-bank p { margin: 4px 0; display: flex; justify-content: space-between; }
         .pay-here-bank span { color: #ffffff; font-weight: bold; }
         .receipt-footer-text { text-align: center; font-size: 11px; color: #555555; margin-top: 25px; }
@@ -367,9 +344,12 @@
         <input type="text" id="accName" placeholder="Account Name">
     </div>
 
-    <!-- 5. Summary Card -->
+    <!-- 5. Real-time Summary Card -->
     <div class="summary-card">
         <h2>Summary</h2>
+        
+        <div id="realtimeIndividualList" style="color: #86868b; font-size: 14px;">No data yet</div>
+
         <div class="grand-total-box">
             <span class="grand-total-label">GRAND TOTAL</span>
             <span class="grand-total-val" id="liveGrandTotal">0.00</span>
@@ -415,7 +395,6 @@
     <!-- POPUP MODAL SHOWING THE JPG IMAGE -->
     <div id="receiptModal" class="modal-overlay">
         <div class="modal-content">
-            <!-- แสดงไฟล์รูปภาพ JPG จริง เพื่อให้บันทึก/ส่งต่อ หรือกดค้างได้ -->
             <img id="generatedBillImg" alt="Helpme Split Receipt">
             <p class="hint-text">💡 กดค้างที่รูปเพื่อบันทึก หรือแชร์ลงแชทได้ทันที</p>
             
@@ -537,19 +516,48 @@
         }
 
         function updateLiveTotal() {
-            if (items.length === 0) {
-                document.getElementById('liveGrandTotal').textContent = '0.00';
+            const listElem = document.getElementById('realtimeIndividualList');
+            const totalElem = document.getElementById('liveGrandTotal');
+
+            if (items.length === 0 || people.length === 0) {
+                listElem.innerHTML = 'No data yet';
+                totalElem.textContent = '0.00';
                 return;
             }
 
-            let subtotal = items.reduce((sum, item) => sum + item.price, 0);
+            let subtotal = 0;
+            let personTotals = {};
+            people.forEach(p => personTotals[p] = 0);
+
+            items.forEach(item => {
+                subtotal += item.price;
+                const splitPrice = item.price / item.sharedBy.length;
+                item.sharedBy.forEach(p => {
+                    if (personTotals[p] !== undefined) personTotals[p] += splitPrice;
+                });
+            });
+
             const discount = parseFloat(document.getElementById('discountInput').value) || 0;
             let total = Math.max(0, subtotal - discount);
 
             if (document.getElementById('scCheckbox').checked) total += total * 0.10;
             if (document.getElementById('vatCheckbox').checked) total += total * 0.07;
 
-            document.getElementById('liveGrandTotal').textContent = total.toFixed(2);
+            const multiplier = subtotal > 0 ? (total / subtotal) : 0;
+
+            let html = '';
+            people.forEach(p => {
+                const finalAmt = personTotals[p] * multiplier;
+                if (finalAmt > 0) {
+                    html += `<div class="realtime-person-row">
+                        <span>${p}</span>
+                        <span class="realtime-person-val">${finalAmt.toFixed(2)}</span>
+                    </div>`;
+                }
+            });
+
+            listElem.innerHTML = html || 'No data yet';
+            totalElem.textContent = total.toFixed(2);
         }
 
         function generateBillJPG() {
@@ -558,7 +566,6 @@
                 return;
             }
 
-            // 1. Populate Hidden HTML Receipt
             let orderHtml = '';
             let subtotal = 0;
             let personTotals = {};
@@ -614,7 +621,6 @@
             document.getElementById('modalIndividualPayment').innerHTML = individualHtml;
             document.getElementById('modalGrandTotalVal').textContent = currentTotal.toFixed(2);
 
-            // Payment Details inside Receipt
             const bank = document.getElementById('bankName').value.trim();
             const accNum = document.getElementById('accNumber').value.trim();
             const accName = document.getElementById('accName').value.trim();
@@ -647,14 +653,12 @@
                 payHereContainer.style.display = 'none';
             }
 
-            // 2. Render to JPG Image via html2canvas
             const target = document.getElementById('receiptCaptureCard');
             html2canvas(target, { backgroundColor: '#000000', scale: 2 }).then(canvas => {
                 generatedImageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
                 const imgElem = document.getElementById('generatedBillImg');
                 imgElem.src = generatedImageDataUrl;
 
-                // Show Modal containing the JPG Image
                 document.getElementById('receiptModal').style.display = 'flex';
             });
         }
