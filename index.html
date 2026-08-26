@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helpme Split</title>
+    <!-- Library สำหรับโหลดบิลเป็นรูปภาพ JPG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -30,7 +32,7 @@
         }
         .card { 
             background: white; 
-            border-radius: 16px; 
+            border-radius: 20px; 
             padding: 24px; 
             margin-bottom: 20px; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
@@ -41,18 +43,21 @@
             margin-bottom: 20px;
             display: flex; 
             align-items: center; 
+            font-weight: 700;
         }
         .dot { 
             width: 12px; 
             height: 12px; 
             border-radius: 50%; 
             margin-right: 12px; 
+            display: inline-block;
         }
         .dot.yellow { background-color: #ffcc00; }
         .dot.red { background-color: #ff3b30; }
+        .dot.black { background-color: #1d1d1f; }
         .dot.green { background-color: #34c759; }
         
-        input[type="text"], input[type="number"], input[type="file"] { 
+        input[type="text"], input[type="number"] { 
             width: 100%; 
             padding: 14px 16px; 
             border: 1px solid #e5e5ea; 
@@ -61,12 +66,6 @@
             box-sizing: border-box; 
             font-size: 16px; 
             background-color: #fafafa;
-            transition: border-color 0.2s;
-        }
-        input:focus {
-            outline: none;
-            border-color: #007aff;
-            background-color: #fff;
         }
         button { 
             width: 100%; 
@@ -76,7 +75,6 @@
             font-size: 16px; 
             font-weight: 700; 
             cursor: pointer; 
-            color: white; 
             transition: opacity 0.2s;
         }
         button:active { opacity: 0.8; }
@@ -86,8 +84,16 @@
             width: auto; 
             padding: 14px 24px; 
         }
-        button.red-btn { background-color: #ff3b30; }
-        button.calc-btn { background-color: #1d1d1f; margin-bottom: 40px; }
+        button.red-btn { background-color: #ff3b30; color: white; }
+        button.download-btn { 
+            background-color: #ffcc00; 
+            color: #1d1d1f; 
+            margin-top: 20px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
         
         .flex-row { display: flex; gap: 10px; }
         .flex-row input { flex: 1; margin-bottom: 0; }
@@ -111,184 +117,231 @@
             font-size: 14px; 
             cursor: pointer; 
             border: 1px solid #e5e5ea;
-            transition: all 0.2s;
         }
-        .checkbox-label:has(input:checked) {
-            background: #ffcc00;
-            border-color: #ffcc00;
-            font-weight: bold;
-        }
-        .checkbox-label input { margin-right: 8px; display: none; }
+        .checkbox-label input { display: none; }
         
-        #summary { margin-top: 20px; margin-bottom: 40px; }
-        .bill-result { 
-            background: white; 
-            padding: 30px 24px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            position: relative;
-        }
-        /* Receipt zig-zag effect */
-        .bill-result::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: 0;
-            right: 0;
-            height: 10px;
-            background-size: 20px 20px;
-            background-image: radial-gradient(circle at 10px 0, transparent 10px, white 11px);
-        }
-        .bill-result h2 { justify-content: center; font-size: 24px; margin-bottom: 30px;}
-        
-        .person-total { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 15px; 
-            border-bottom: 1px dashed #e5e5ea; 
-            padding-bottom: 10px; 
-            font-size: 17px;
-        }
-        .grand-total {
+        /* Item Table Styles */
+        .table-header {
             display: flex;
             justify-content: space-between;
+            font-weight: 700;
+            font-size: 12px;
+            color: #1d1d1f;
+            letter-spacing: 0.5px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1d1d1f;
             margin-top: 20px;
-            font-size: 22px;
-            font-weight: 800;
-            color: #ff3b30;
-            padding-top: 15px;
-            border-top: 2px solid #1d1d1f;
         }
-        
-        .qr-preview { 
-            max-width: 150px; 
-            max-height: 150px; 
-            display: block; 
-            margin: 10px 0; 
-            border-radius: 12px; 
-            border: 1px solid #e5e5ea;
-        }
-        
-        .pay-here { 
-            text-align: center; 
-            margin-top: 30px; 
-            padding-top: 25px; 
-            border-top: 2px dashed #e5e5ea; 
-        }
-        .pay-here h3 { 
-            color: #34c759; 
-            margin-bottom: 20px; 
-            font-size: 20px;
-        }
-        .bank-details { 
-            text-align: left; 
-            background: #f5f5f7; 
-            padding: 20px; 
-            border-radius: 16px; 
-            display: inline-block; 
-            width: 100%; 
-            box-sizing: border-box;
-        }
-        .bank-details p { 
-            margin: 8px 0; 
-            font-size: 15px; 
+        .table-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
         }
-        .bank-details p span { font-weight: bold; color: #1d1d1f; }
-        
-        ul { list-style: none; padding: 0; margin: 0; }
-        li { 
-            padding: 12px 0; 
-            border-bottom: 1px solid #f0f0f0; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        li:last-child { border-bottom: none; }
+        .col-item { flex: 2; font-weight: 600; }
+        .col-price { flex: 1; text-align: center; }
+        .col-shared { flex: 2; color: #86868b; font-size: 12px; text-align: center; padding: 0 5px; }
+        .col-action { flex: 1; text-align: right; }
+
         .delete-btn { 
-            background: #f5f5f7; 
+            background: none; 
             color: #ff3b30; 
-            padding: 8px 12px; 
-            border-radius: 8px;
+            padding: 0; 
             width: auto; 
             font-size: 13px; 
+            font-weight: 600;
         }
-        
-        .file-upload-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-        .file-upload-wrapper input[type=file] {
-            font-size: 100px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
+
+        /* Checkbox list style */
+        .charge-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
         }
+        .charge-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #1d1d1f;
+        }
+
+        /* Summary Dark Card */
+        .summary-card {
+            background: linear-gradient(180deg, #1a1a1a 0%, #000000 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        .summary-card h2 {
+            color: #ffcc00;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #e5e5ea;
+        }
+        .grand-total-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        .grand-total-label {
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: #86868b;
+            font-weight: 700;
+        }
+        .grand-total-val {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+        }
+
+        /* Pay Here Section inside Summary */
+        .pay-here-box {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed #444;
+            text-align: center;
+        }
+        .pay-here-box h3 {
+            color: #34c759;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .bank-info {
+            background: #222;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .bank-info p { margin: 5px 0; display: flex; justify-content: space-between; }
+        .bank-info span { color: white; font-weight: bold; }
+
         .btn-upload {
-            background-color: #f5f5f7;
+            background-color: #fafafa;
             color: #007aff;
             border: 1px dashed #007aff;
-            padding: 14px;
+            padding: 12px;
             border-radius: 12px;
             text-align: center;
             font-weight: 600;
-            display: block;
             margin-bottom: 12px;
             cursor: pointer;
+            font-size: 14px;
+        }
+        .file-upload-wrapper { position: relative; overflow: hidden; }
+        .file-upload-wrapper input[type=file] {
+            position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%;
         }
     </style>
 </head>
 <body>
+
     <h1>Helpme Split</h1>
     <p class="subtitle">💗 NO MORE TABLE MATH 💗</p>
 
-    <!-- People Section -->
+    <!-- 1. Add People -->
     <div class="card">
         <h2><span class="dot yellow"></span> Add People</h2>
         <div class="flex-row">
             <input type="text" id="personName" placeholder="Enter name...">
             <button class="add-btn" onclick="addPerson()">Add</button>
         </div>
-        <ul id="peopleList" style="margin-top: 15px;"></ul>
+        <div id="peopleList" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
     </div>
 
-    <!-- Items Section -->
+    <!-- 2. Add Food Items -->
     <div class="card">
         <h2><span class="dot red"></span> Add Food Items</h2>
         <input type="text" id="itemName" placeholder="Item name">
         <input type="number" id="itemPrice" placeholder="Price (฿)">
-        <div style="margin: 20px 0 10px 0; font-weight: 600; font-size: 15px;">Who shared this item?</div>
+        
+        <div style="margin: 15px 0 10px 0; font-weight: 600; font-size: 14px;">Who shared this item?</div>
         <div id="sharedBy" class="checkbox-group">
             <span style="color:#86868b; font-size:14px; font-style: italic;">Please add people first</span>
         </div>
         <button class="red-btn" onclick="addItem()">Add Item</button>
-        <ul id="itemList" style="margin-top: 15px;"></ul>
+
+        <!-- Item Table -->
+        <div class="table-header">
+            <span class="col-item">ITEM</span>
+            <span class="col-price">PRICE</span>
+            <span class="col-shared">SHARED BY</span>
+            <span class="col-action">ACTION</span>
+        </div>
+        <div id="itemList"></div>
     </div>
 
-    <!-- Payment Details Section -->
+    <!-- 3. Additional Charges -->
     <div class="card">
-        <h2><span class="dot green"></span> Payment Info <span style="font-size: 12px; color: #86868b; margin-left: 8px; font-weight: normal;">(Optional)</span></h2>
+        <h2><span class="dot black"></span> Additional Charges</h2>
+        
+        <label class="charge-option">
+            <input type="checkbox" id="scCheckbox" onchange="calculate()"> Service Charge 10%
+        </label>
+        
+        <label class="charge-option">
+            <input type="checkbox" id="vatCheckbox" onchange="calculate()"> VAT 7%
+        </label>
+
+        <div style="margin-top: 15px;">
+            <label style="font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px;">Discount Amount</label>
+            <input type="number" id="discountInput" value="0" oninput="calculate()">
+        </div>
+    </div>
+
+    <!-- 4. Payment Info (Optional) -->
+    <div class="card">
+        <h2><span class="dot green"></span> Payment Info <span style="font-size: 12px; color: #86868b; margin-left: 5px; font-weight: normal;">(Optional)</span></h2>
         
         <div class="file-upload-wrapper">
-            <div class="btn-upload">📷 Upload QR Code (PromptPay)</div>
+            <div class="btn-upload" id="uploadLabel">📷 Upload QR Code (PromptPay)</div>
             <input type="file" id="qrUpload" accept="image/*" onchange="previewQR(event)">
         </div>
-        <img id="qrPreviewImage" class="qr-preview" style="display:none;">
-        
-        <div style="margin: 20px 0 10px 0; font-weight: 600; font-size: 15px;">Or Bank Details</div>
-        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank, SCB)">
-        <input type="text" id="accNumber" placeholder="Account Number">
-        <input type="text" id="accName" placeholder="Account Name">
+        <img id="qrPreviewImage" style="max-width: 120px; display:none; margin: 10px auto; border-radius: 8px;">
+
+        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank)" oninput="calculate()">
+        <input type="text" id="accNumber" placeholder="Account Number" oninput="calculate()">
+        <input type="text" id="accName" placeholder="Account Name" oninput="calculate()">
     </div>
 
-    <button class="calc-btn" onclick="generateBill()">Generate Bill</button>
+    <!-- 5. Summary Dark Card -->
+    <div class="summary-card" id="billSummaryCard">
+        <h2>Summary</h2>
+        <div id="summaryContent" style="color: #86868b; font-size: 14px;">No data yet</div>
 
-    <div id="summary"></div>
+        <div class="grand-total-box">
+            <span class="grand-total-label">GRAND TOTAL</span>
+            <span class="grand-total-val" id="grandTotalVal">0.00</span>
+        </div>
+
+        <!-- Pay Here Area -->
+        <div id="payHereArea" style="display: none;" class="pay-here-box">
+            <h3>☘️ Pay here ☘️</h3>
+            <img id="summaryQrImg" style="max-width: 180px; width:100%; border-radius: 12px; display: none; margin: 0 auto 15px auto;">
+            <div id="summaryBankInfo" class="bank-info" style="display: none;"></div>
+        </div>
+    </div>
+
+    <button class="download-btn" onclick="downloadBillImage()">
+        📥 Generate Bill (JPG)
+    </button>
 
     <script>
         let people = [];
@@ -296,31 +349,35 @@
         let qrDataUrl = '';
 
         function addPerson() {
-            const nameInput = document.getElementById('personName');
-            const name = nameInput.value.trim();
+            const input = document.getElementById('personName');
+            const name = input.value.trim();
             if (name && !people.includes(name)) {
                 people.push(name);
-                nameInput.value = '';
-                updatePeopleList();
-                updateCheckboxGroup();
+                input.value = '';
+                renderPeople();
+                renderCheckboxes();
+                calculate();
             }
         }
 
         function removePerson(index) {
             people.splice(index, 1);
-            updatePeopleList();
-            updateCheckboxGroup();
+            renderPeople();
+            renderCheckboxes();
+            calculate();
         }
 
-        function updatePeopleList() {
+        function renderPeople() {
             const list = document.getElementById('peopleList');
             list.innerHTML = '';
             people.forEach((p, i) => {
-                list.innerHTML += `<li><span>${p}</span> <button class="delete-btn" onclick="removePerson(${i})">Remove</button></li>`;
+                list.innerHTML += `<span style="background:#f5f5f7; border: 1px solid #e5e5ea; padding: 6px 12px; border-radius: 20px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                    ${p} <b onclick="removePerson(${i})" style="color:#ff3b30; cursor:pointer;">×</b>
+                </span>`;
             });
         }
 
-        function updateCheckboxGroup() {
+        function renderCheckboxes() {
             const group = document.getElementById('sharedBy');
             if (people.length === 0) {
                 group.innerHTML = '<span style="color:#86868b; font-size:14px; font-style: italic;">Please add people first</span>';
@@ -330,19 +387,12 @@
             people.forEach(p => {
                 group.innerHTML += `<label class="checkbox-label"><input type="checkbox" value="${p}" class="person-cb"> ${p}</label>`;
             });
-            
-            // Add event listeners to toggle visual state of custom checkboxes
+
             document.querySelectorAll('.person-cb').forEach(cb => {
                 cb.addEventListener('change', function() {
-                    if(this.checked) {
-                        this.parentElement.style.background = '#ffcc00';
-                        this.parentElement.style.borderColor = '#ffcc00';
-                        this.parentElement.style.fontWeight = 'bold';
-                    } else {
-                        this.parentElement.style.background = 'white';
-                        this.parentElement.style.borderColor = '#e5e5ea';
-                        this.parentElement.style.fontWeight = 'normal';
-                    }
+                    this.parentElement.style.background = this.checked ? '#ffcc00' : 'white';
+                    this.parentElement.style.borderColor = this.checked ? '#ffcc00' : '#e5e5ea';
+                    this.parentElement.style.fontWeight = this.checked ? 'bold' : 'normal';
                 });
             });
         }
@@ -350,51 +400,43 @@
         function addItem() {
             const name = document.getElementById('itemName').value.trim();
             const price = parseFloat(document.getElementById('itemPrice').value);
-            const checkboxes = document.querySelectorAll('.person-cb:checked');
-            
-            if (!name || isNaN(price) || price <= 0) {
-                alert('Please enter a valid item name and price.');
-                return;
-            }
-            if (checkboxes.length === 0) {
-                alert('Please select at least one person who shared this item.');
+            const selected = Array.from(document.querySelectorAll('.person-cb:checked')).map(cb => cb.value);
+
+            if (!name || isNaN(price) || price <= 0 || selected.length === 0) {
+                alert('Please enter valid item name, price, and select at least one person.');
                 return;
             }
 
-            const sharedBy = Array.from(checkboxes).map(cb => cb.value);
-            items.push({ name, price, sharedBy });
-            
+            items.push({ name, price, sharedBy: selected });
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
-            
-            // Reset checkboxes visually and logically
             document.querySelectorAll('.person-cb').forEach(cb => {
                 cb.checked = false;
                 cb.parentElement.style.background = 'white';
                 cb.parentElement.style.borderColor = '#e5e5ea';
                 cb.parentElement.style.fontWeight = 'normal';
             });
-            
-            updateItemList();
+
+            renderItems();
+            calculate();
         }
 
         function removeItem(index) {
             items.splice(index, 1);
-            updateItemList();
+            renderItems();
+            calculate();
         }
 
-        function updateItemList() {
+        function renderItems() {
             const list = document.getElementById('itemList');
             list.innerHTML = '';
             items.forEach((item, i) => {
-                list.innerHTML += `<li>
-                    <div>
-                        <strong style="font-size: 16px;">${item.name}</strong> 
-                        <span style="color: #ff3b30; font-weight: 600; margin-left: 5px;">฿${item.price}</span> 
-                        <br><small style="color:#86868b; display:inline-block; margin-top:4px;">Shared by: ${item.sharedBy.join(', ')}</small>
-                    </div>
-                    <button class="delete-btn" onclick="removeItem(${i})">Remove</button>
-                </li>`;
+                list.innerHTML += `<div class="table-row">
+                    <span class="col-item">${item.name}</span>
+                    <span class="col-price">฿${item.price}</span>
+                    <span class="col-shared">${item.sharedBy.join(', ')}</span>
+                    <span class="col-action"><button class="delete-btn" onclick="removeItem(${i})">Remove</button></span>
+                </div>`;
             });
         }
 
@@ -404,78 +446,102 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     qrDataUrl = e.target.result;
-                    const img = document.getElementById('qrPreviewImage');
-                    img.src = qrDataUrl;
-                    img.style.display = 'block';
-                    
-                    // Update button text
-                    document.querySelector('.btn-upload').textContent = '✅ QR Code Uploaded (Click to change)';
+                    document.getElementById('uploadLabel').textContent = '✅ QR Code Uploaded';
+                    calculate();
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        function generateBill() {
-            if (people.length === 0 || items.length === 0) {
-                alert('Please add people and items first.');
+        function calculate() {
+            if (items.length === 0 || people.length === 0) {
+                document.getElementById('summaryContent').innerHTML = 'No data yet';
+                document.getElementById('grandTotalVal').textContent = '0.00';
+                document.getElementById('payHereArea').style.display = 'none';
                 return;
             }
 
-            let totals = {};
-            people.forEach(p => totals[p] = 0);
+            let subtotal = 0;
+            let personSubtotals = {};
+            people.forEach(p => personSubtotals[p] = 0);
 
             items.forEach(item => {
-                const splitAmount = item.price / item.sharedBy.length;
+                subtotal += item.price;
+                const splitPrice = item.price / item.sharedBy.length;
                 item.sharedBy.forEach(p => {
-                    if (totals[p] !== undefined) {
-                        totals[p] += splitAmount;
+                    if (personSubtotals[p] !== undefined) {
+                        personSubtotals[p] += splitPrice;
                     }
                 });
             });
 
-            let grandTotal = 0;
-            let html = '<div class="bill-result"><h2>🧾 Bill Summary</h2>';
-            
-            for (const person in totals) {
-                const amt = totals[person];
-                if (amt > 0) {
-                    html += `<div class="person-total"><span>${person}</span> <strong>฿${amt.toFixed(2)}</strong></div>`;
-                    grandTotal += amt;
-                }
-            }
-            
-            html += `<div class="grand-total"><span>Total</span> <span>฿${grandTotal.toFixed(2)}</span></div>`;
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            let currentTotal = Math.max(0, subtotal - discount);
 
-            // Add Payment Section
-            const bankName = document.getElementById('bankName').value.trim();
+            const hasSC = document.getElementById('scCheckbox').checked;
+            const scAmount = hasSC ? currentTotal * 0.10 : 0;
+            currentTotal += scAmount;
+
+            const hasVAT = document.getElementById('vatCheckbox').checked;
+            const vatAmount = hasVAT ? currentTotal * 0.07 : 0;
+            const grandTotal = currentTotal + vatAmount;
+
+            // Ratio for additional charges
+            const multiplier = subtotal > 0 ? (grandTotal / subtotal) : 0;
+
+            let html = '';
+            people.forEach(p => {
+                const finalPersonTotal = personSubtotals[p] * multiplier;
+                if (finalPersonTotal > 0) {
+                    html += `<div class="summary-item"><span>${p}</span> <strong>฿${finalPersonTotal.toFixed(2)}</strong></div>`;
+                }
+            });
+
+            document.getElementById('summaryContent').innerHTML = html;
+            document.getElementById('grandTotalVal').textContent = grandTotal.toFixed(2);
+
+            // Payment Details Render
+            const bank = document.getElementById('bankName').value.trim();
             const accNum = document.getElementById('accNumber').value.trim();
             const accName = document.getElementById('accName').value.trim();
 
-            if (qrDataUrl || bankName || accNum || accName) {
-                html += `<div class="pay-here">
-                    <h3>☘️ Pay here ☘️</h3>`;
-                
+            const payHereArea = document.getElementById('payHereArea');
+            const summaryQrImg = document.getElementById('summaryQrImg');
+            const summaryBankInfo = document.getElementById('summaryBankInfo');
+
+            if (qrDataUrl || bank || accNum || accName) {
+                payHereArea.style.display = 'block';
+
                 if (qrDataUrl) {
-                    html += `<img src="${qrDataUrl}" alt="QR Code" style="max-width: 220px; width: 100%; border-radius: 16px; display: block; margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e5ea;">`;
+                    summaryQrImg.src = qrDataUrl;
+                    summaryQrImg.style.display = 'block';
+                } else {
+                    summaryQrImg.style.display = 'none';
                 }
 
-                if (bankName || accNum || accName) {
-                    html += `<div class="bank-details">`;
-                    if (bankName) html += `<p>Bank: <span>${bankName}</span></p>`;
-                    if (accNum) html += `<p>Account No: <span>${accNum}</span></p>`;
-                    if (accName) html += `<p>Name: <span>${accName}</span></p>`;
-                    html += `</div>`;
+                if (bank || accNum || accName) {
+                    let bankHtml = '';
+                    if (bank) bankHtml += `<p>Bank: <span>${bank}</span></p>`;
+                    if (accNum) bankHtml += `<p>Account No: <span>${accNum}</span></p>`;
+                    if (accName) bankHtml += `<p>Name: <span>${accName}</span></p>`;
+                    summaryBankInfo.innerHTML = bankHtml;
+                    summaryBankInfo.style.display = 'block';
+                } else {
+                    summaryBankInfo.style.display = 'none';
                 }
-                html += `</div>`;
+            } else {
+                payHereArea.style.display = 'none';
             }
+        }
 
-            html += '</div>';
-            document.getElementById('summary').innerHTML = html;
-            
-            // Scroll to summary
-            setTimeout(() => {
-                document.getElementById('summary').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+        function downloadBillImage() {
+            const summaryCard = document.getElementById('billSummaryCard');
+            html2canvas(summaryCard, { backgroundColor: null }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Helpme-Split-Bill.jpg';
+                link.href = canvas.toDataURL('image/jpeg');
+                link.click();
+            });
         }
     </script>
 </body>
