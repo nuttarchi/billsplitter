@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helpme Split</title>
-    <!-- html2canvas สำหรับจับภาพ Popup บิลเป็นไฟล์รูป JPG -->
+    <!-- Library สำหรับแปลง HTML เป็นไฟล์รูปภาพ JPG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { 
@@ -160,7 +160,7 @@
         .file-upload-wrapper { position: relative; overflow: hidden; }
         .file-upload-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
 
-        /* Main Page Live Summary Dark Card */
+        /* Summary Dark Card */
         .summary-card {
             background: #111111;
             color: white;
@@ -180,7 +180,7 @@
         .grand-total-label { font-size: 14px; letter-spacing: 1px; color: #86868b; font-weight: 700; }
         .grand-total-val { font-size: 32px; font-weight: 800; color: white; }
 
-        /* MODAL POPUP STYLING (ตรงตามรูปที่แนบมา) */
+        /* MODAL POPUP STYLING */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -190,12 +190,41 @@
             align-items: center;
             z-index: 9999;
             overflow-y: auto;
-            padding: 20px 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .modal-content {
             width: 100%;
             max-width: 380px;
             margin: auto;
+            text-align: center;
+        }
+        /* รูปภาพบิล JPG ที่ Generate ออกมา */
+        #generatedBillImg {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            display: block;
+            margin-bottom: 12px;
+        }
+        .hint-text {
+            color: #86868b;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-download-jpg { background: #ffcc00; color: #1d1d1f; font-weight: 700; }
+        .btn-close-modal { background: #333333; color: white; font-weight: 600; }
+
+        /* HIDDEN RECEIPT CANVAS (สำหรับเรนเดอร์เป็นภาพซ่อนไว้หลังบ้าน) */
+        #hiddenReceiptContainer {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 380px;
         }
         .receipt-card {
             background-color: #000000;
@@ -204,6 +233,7 @@
             padding: 30px 24px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            box-sizing: border-box;
         }
         .receipt-header-title {
             text-align: center;
@@ -233,49 +263,16 @@
             margin-bottom: 15px;
             text-transform: uppercase;
         }
-        .receipt-item-row {
-            margin-bottom: 12px;
-        }
-        .receipt-item-main {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 700;
-            font-size: 16px;
-        }
-        .receipt-item-sub {
-            font-size: 12px;
-            color: #86868b;
-            margin-top: 2px;
-        }
-        .receipt-charge-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            color: #cccccc;
-            margin-bottom: 8px;
-        }
-        .receipt-person-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .receipt-person-amount {
-            color: #ffcc00;
-            font-weight: 800;
-            font-size: 20px;
-        }
-        .receipt-grand-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .receipt-item-row { margin-bottom: 12px; }
+        .receipt-item-main { display: flex; justify-content: space-between; font-weight: 700; font-size: 16px; }
+        .receipt-item-sub { font-size: 12px; color: #86868b; margin-top: 2px; }
+        .receipt-charge-row { display: flex; justify-content: space-between; font-size: 14px; color: #cccccc; margin-bottom: 8px; }
+        .receipt-person-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 18px; font-weight: 600; }
+        .receipt-person-amount { color: #ffcc00; font-weight: 800; font-size: 20px; }
+        .receipt-grand-row { display: flex; justify-content: space-between; align-items: center; }
         .receipt-grand-label { font-size: 14px; font-weight: 700; color: #86868b; letter-spacing: 1px; }
         .receipt-grand-val { font-size: 28px; font-weight: 800; color: #ffffff; }
 
-        /* Pay Here Section inside Popup */
         .pay-here-container {
             margin-top: 25px;
             padding-top: 20px;
@@ -295,21 +292,7 @@
         }
         .pay-here-bank p { margin: 4px 0; display: flex; justify-content: space-between; }
         .pay-here-bank span { color: #ffffff; font-weight: bold; }
-
-        .receipt-footer-text {
-            text-align: center;
-            font-size: 11px;
-            color: #555555;
-            margin-top: 25px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .btn-download-jpg { background: #ffcc00; color: #1d1d1f; font-weight: 700; }
-        .btn-close-modal { background: #333333; color: white; font-weight: 600; }
+        .receipt-footer-text { text-align: center; font-size: 11px; color: #555555; margin-top: 25px; }
     </style>
 </head>
 <body>
@@ -385,57 +368,55 @@
             <span class="grand-total-label">GRAND TOTAL</span>
             <span class="grand-total-val" id="liveGrandTotal">0.00</span>
         </div>
-        <button class="generate-btn" onclick="generateBillModal()">📥 Generate Bill (JPG)</button>
+        <button class="generate-btn" onclick="generateBillJPG()">📥 Generate Bill (JPG)</button>
     </div>
 
-    <!-- MODAL POPUP FOR RECEIPT -->
+    <!-- HIDDEN RECEIPT HTML FOR HTML2CANVAS -->
+    <div id="hiddenReceiptContainer">
+        <div id="receiptCaptureCard" class="receipt-card">
+            <h1 class="receipt-header-title">Helpme Split</h1>
+            <p class="receipt-header-sub">BILL SUMMARY RECEIPT</p>
+
+            <div class="receipt-divider"></div>
+
+            <div class="receipt-section-title">ORDER DETAILS</div>
+            <div id="modalOrderDetails"></div>
+
+            <div id="modalChargesDetails"></div>
+
+            <div class="receipt-divider"></div>
+
+            <div class="receipt-section-title">INDIVIDUAL PAYMENT</div>
+            <div id="modalIndividualPayment"></div>
+
+            <div class="receipt-divider-gold"></div>
+
+            <div class="receipt-grand-row">
+                <span class="receipt-grand-label">GRAND TOTAL</span>
+                <span class="receipt-grand-val" id="modalGrandTotalVal">0.00</span>
+            </div>
+
+            <div id="modalPayHereContainer" class="pay-here-container" style="display: none;">
+                <div class="pay-here-title">☘️ Pay here ☘️</div>
+                <img id="modalQrImage" class="pay-here-qr" style="display: none;">
+                <div id="modalBankInfo" class="pay-here-bank" style="display: none;"></div>
+            </div>
+
+            <div class="receipt-footer-text">Generated by Helpme Split</div>
+        </div>
+    </div>
+
+    <!-- POPUP MODAL SHOWING THE JPG IMAGE -->
     <div id="receiptModal" class="modal-overlay">
         <div class="modal-content">
+            <!-- แสดงไฟล์รูปภาพ JPG จริง เพื่อให้บันทึก/ส่งต่อ หรือกดค้างได้ -->
+            <img id="generatedBillImg" alt="Helpme Split Receipt">
+            <p class="hint-text">💡 กดค้างที่รูปเพื่อบันทึก หรือแชร์ลงแชทได้ทันที</p>
             
-            <!-- Receipt Card To Capture -->
-            <div id="receiptCaptureCard" class="receipt-card">
-                <h1 class="receipt-header-title">Helpme Split</h1>
-                <p class="receipt-header-sub">BILL SUMMARY RECEIPT</p>
-
-                <div class="receipt-divider"></div>
-
-                <!-- ORDER DETAILS -->
-                <div class="receipt-section-title">ORDER DETAILS</div>
-                <div id="modalOrderDetails"></div>
-
-                <!-- CHARGES DETAILS -->
-                <div id="modalChargesDetails"></div>
-
-                <div class="receipt-divider"></div>
-
-                <!-- INDIVIDUAL PAYMENT -->
-                <div class="receipt-section-title">INDIVIDUAL PAYMENT</div>
-                <div id="modalIndividualPayment"></div>
-
-                <div class="receipt-divider-gold"></div>
-
-                <!-- GRAND TOTAL -->
-                <div class="receipt-grand-row">
-                    <span class="receipt-grand-label">GRAND TOTAL</span>
-                    <span class="receipt-grand-val" id="modalGrandTotalVal">0.00</span>
-                </div>
-
-                <!-- PAY HERE SECTION -->
-                <div id="modalPayHereContainer" class="pay-here-container" style="display: none;">
-                    <div class="pay-here-title">☘️ Pay here ☘️</div>
-                    <img id="modalQrImage" class="pay-here-qr" style="display: none;">
-                    <div id="modalBankInfo" class="pay-here-bank" style="display: none;"></div>
-                </div>
-
-                <div class="receipt-footer-text">Generated by Helpme Split</div>
-            </div>
-
-            <!-- Modal Action Buttons -->
             <div class="modal-buttons">
-                <button class="btn-download-jpg" onclick="downloadReceiptJPG()">Save Image (JPG)</button>
-                <button class="btn-close-modal" onclick="closeModal()">Close</button>
+                <button class="btn-download-jpg" onclick="downloadImageFile()">ดาวน์โหลดรูปภาพ</button>
+                <button class="btn-close-modal" onclick="closeModal()">ปิด</button>
             </div>
-
         </div>
     </div>
 
@@ -443,6 +424,7 @@
         let people = [];
         let items = [];
         let qrDataUrl = '';
+        let generatedImageDataUrl = '';
 
         function addPerson() {
             const input = document.getElementById('personName');
@@ -564,13 +546,13 @@
             document.getElementById('liveGrandTotal').textContent = total.toFixed(2);
         }
 
-        function generateBillModal() {
+        function generateBillJPG() {
             if (people.length === 0 || items.length === 0) {
                 alert('Please add people and items first.');
                 return;
             }
 
-            // 1. Render Order Details
+            // 1. Populate Hidden HTML Receipt
             let orderHtml = '';
             let subtotal = 0;
             let personTotals = {};
@@ -593,7 +575,6 @@
             });
             document.getElementById('modalOrderDetails').innerHTML = orderHtml;
 
-            // 2. Render Charges Details
             let chargesHtml = '';
             const discount = parseFloat(document.getElementById('discountInput').value) || 0;
             let currentTotal = Math.max(0, subtotal - discount);
@@ -613,7 +594,6 @@
             }
             document.getElementById('modalChargesDetails').innerHTML = chargesHtml;
 
-            // 3. Render Individual Payment
             const multiplier = subtotal > 0 ? (currentTotal / subtotal) : 0;
             let individualHtml = '';
             people.forEach(p => {
@@ -628,7 +608,7 @@
             document.getElementById('modalIndividualPayment').innerHTML = individualHtml;
             document.getElementById('modalGrandTotalVal').textContent = currentTotal.toFixed(2);
 
-            // 4. Render Pay Here Section inside Modal Popup
+            // Payment Details inside Receipt
             const bank = document.getElementById('bankName').value.trim();
             const accNum = document.getElementById('accNumber').value.trim();
             const accName = document.getElementById('accName').value.trim();
@@ -661,22 +641,29 @@
                 payHereContainer.style.display = 'none';
             }
 
-            // Open Modal
-            document.getElementById('receiptModal').style.display = 'flex';
+            // 2. Render to JPG Image via html2canvas
+            const target = document.getElementById('receiptCaptureCard');
+            html2canvas(target, { backgroundColor: '#000000', scale: 2 }).then(canvas => {
+                generatedImageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                const imgElem = document.getElementById('generatedBillImg');
+                imgElem.src = generatedImageDataUrl;
+
+                // Show Modal containing the JPG Image
+                document.getElementById('receiptModal').style.display = 'flex';
+            });
         }
 
         function closeModal() {
             document.getElementById('receiptModal').style.display = 'none';
         }
 
-        function downloadReceiptJPG() {
-            const card = document.getElementById('receiptCaptureCard');
-            html2canvas(card, { backgroundColor: '#000000', scale: 2 }).then(canvas => {
+        function downloadImageFile() {
+            if (generatedImageDataUrl) {
                 const link = document.createElement('a');
                 link.download = 'Helpme-Split-Receipt.jpg';
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.href = generatedImageDataUrl;
                 link.click();
-            });
+            }
         }
     </script>
 </body>
