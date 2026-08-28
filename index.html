@@ -20,6 +20,11 @@
             margin: 0 auto; 
             color: #1d1d1f; 
         }
+        .header-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 25px;
+        }
         h1 { 
             text-align: center; 
             margin-bottom: 5px; 
@@ -32,8 +37,26 @@
             color: #86868b; 
             font-size: 13px; 
             letter-spacing: 1px; 
-            margin-bottom: 30px; 
+            margin-bottom: 15px; 
             font-weight: 600;
+        }
+        .btn-clear-all {
+            background-color: #e5e5ea;
+            color: #ff3b30;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-clear-all:active {
+            opacity: 0.7;
+            transform: scale(0.96);
         }
         .card { 
             background: white; 
@@ -280,8 +303,11 @@
 </head>
 <body>
 
-    <h1>Helpme Split</h1>
-    <p class="subtitle">💗 NO MORE TABLE MATH 💗</p>
+    <div class="header-container">
+        <h1>Helpme Split</h1>
+        <p class="subtitle">💗 NO MORE TABLE MATH 💗</p>
+        <button class="btn-clear-all" onclick="clearAllData()">🗑️ Clear Data (เริ่มใหม่)</button>
+    </div>
 
     <!-- 1. Add People -->
     <div class="card">
@@ -318,14 +344,14 @@
     <div class="card">
         <h2><span class="dot black"></span> Additional Charges</h2>
         <label class="charge-option">
-            <input type="checkbox" id="scCheckbox" onchange="updateLiveTotal()"> Service Charge 10%
+            <input type="checkbox" id="scCheckbox" onchange="updateLiveTotal(); saveData();"> Service Charge 10%
         </label>
         <label class="charge-option">
-            <input type="checkbox" id="vatCheckbox" onchange="updateLiveTotal()"> VAT 7%
+            <input type="checkbox" id="vatCheckbox" onchange="updateLiveTotal(); saveData();"> VAT 7%
         </label>
         <div style="margin-top: 15px;">
             <label style="font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px;">Discount Amount</label>
-            <input type="number" id="discountInput" value="0" oninput="updateLiveTotal()">
+            <input type="number" id="discountInput" value="0" oninput="updateLiveTotal(); saveData();">
         </div>
     </div>
 
@@ -339,9 +365,9 @@
         </div>
         <img id="qrPreviewImage" style="max-width: 120px; display:none; margin: 10px auto; border-radius: 8px;">
 
-        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank)">
-        <input type="text" id="accNumber" placeholder="Account Number">
-        <input type="text" id="accName" placeholder="Account Name">
+        <input type="text" id="bankName" placeholder="Bank Name (e.g. KBank)" oninput="saveData()">
+        <input type="text" id="accNumber" placeholder="Account Number" oninput="saveData()">
+        <input type="text" id="accName" placeholder="Account Name" oninput="saveData()">
     </div>
 
     <!-- 5. Real-time Summary Card -->
@@ -411,6 +437,80 @@
         let qrDataUrl = '';
         let generatedImageDataUrl = '';
 
+        // บันทึกข้อมูลลง LocalStorage อัตโนมัติ
+        function saveData() {
+            const dataState = {
+                people,
+                items,
+                qrDataUrl,
+                sc: document.getElementById('scCheckbox').checked,
+                vat: document.getElementById('vatCheckbox').checked,
+                discount: document.getElementById('discountInput').value,
+                bankName: document.getElementById('bankName').value,
+                accNumber: document.getElementById('accNumber').value,
+                accName: document.getElementById('accName').value
+            };
+            localStorage.setItem('helpme_split_state', JSON.stringify(dataState));
+        }
+
+        // ดึงข้อมูลเดิมขึ้นมาแสดงเมื่อเข้าเว็บ
+        function loadData() {
+            const saved = localStorage.getItem('helpme_split_state');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    people = state.people || [];
+                    items = state.items || [];
+                    qrDataUrl = state.qrDataUrl || '';
+
+                    document.getElementById('scCheckbox').checked = !!state.sc;
+                    document.getElementById('vatCheckbox').checked = !!state.vat;
+                    document.getElementById('discountInput').value = state.discount || 0;
+                    document.getElementById('bankName').value = state.bankName || '';
+                    document.getElementById('accNumber').value = state.accNumber || '';
+                    document.getElementById('accName').value = state.accName || '';
+
+                    if (qrDataUrl) {
+                        document.getElementById('uploadLabel').textContent = '✅ QR Code Uploaded';
+                    }
+
+                    renderPeople();
+                    renderCheckboxes();
+                    renderItems();
+                    updateLiveTotal();
+                } catch(e) {
+                    console.error("Failed to load saved state", e);
+                }
+            }
+        }
+
+        // ล้างข้อมูลทั้งหมดเพื่อเริ่มคิดบิลใหม่
+        function clearAllData() {
+            if (confirm('คุณต้องการล้างข้อมูลทั้งหมดเพื่อเริ่มคิดบิลใหม่ใช่หรือไม่?')) {
+                localStorage.removeItem('helpme_split_state');
+                people = [];
+                items = [];
+                qrDataUrl = '';
+
+                document.getElementById('personName').value = '';
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemPrice').value = '';
+                document.getElementById('scCheckbox').checked = false;
+                document.getElementById('vatCheckbox').checked = false;
+                document.getElementById('discountInput').value = 0;
+                document.getElementById('bankName').value = '';
+                document.getElementById('accNumber').value = '';
+                document.getElementById('accName').value = '';
+                document.getElementById('uploadLabel').textContent = '📷 Upload QR Code (PromptPay)';
+                document.getElementById('qrUpload').value = '';
+
+                renderPeople();
+                renderCheckboxes();
+                renderItems();
+                updateLiveTotal();
+            }
+        }
+
         function addPerson() {
             const input = document.getElementById('personName');
             const name = input.value.trim();
@@ -420,6 +520,7 @@
                 renderPeople();
                 renderCheckboxes();
                 updateLiveTotal();
+                saveData();
             }
         }
 
@@ -428,6 +529,7 @@
             renderPeople();
             renderCheckboxes();
             updateLiveTotal();
+            saveData();
         }
 
         function renderPeople() {
@@ -482,12 +584,14 @@
 
             renderItems();
             updateLiveTotal();
+            saveData();
         }
 
         function removeItem(index) {
             items.splice(index, 1);
             renderItems();
             updateLiveTotal();
+            saveData();
         }
 
         function renderItems() {
@@ -510,6 +614,7 @@
                 reader.onload = function(e) {
                     qrDataUrl = e.target.result;
                     document.getElementById('uploadLabel').textContent = '✅ QR Code Uploaded';
+                    saveData();
                 }
                 reader.readAsDataURL(file);
             }
@@ -675,6 +780,9 @@
                 link.click();
             }
         }
+
+        // โหลดข้อมูลเดิมขึ้นมาเมื่อเข้าใช้งานเว็บ
+        window.onload = loadData;
     </script>
 </body>
 </html>
